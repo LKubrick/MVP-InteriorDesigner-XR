@@ -5,7 +5,7 @@ public class MiniatureObjectController : MonoBehaviour
     private Vector3 initialPosition;
     private Quaternion initialRotation;
     public Transform lifeSizeObject; // Assign this in the Inspector
-    public float multiplyFactor = 2f;
+    public float multiplyFactor = 8f;
 
     private void Start()
     {
