@@ -6,8 +6,8 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Samples/Meta MR Utility Kit/63.0.0/Virtual Home/VirtualHome_Passthrough.unity
-    guid: f6ec4171f7e3947f287f4919fc63d9ec
+    path: Assets/Samples/Meta MR Utility Kit/65.0.0/Virtual Home/VirtualHome.unity
+    guid: 89c9f2977ebcf294fabcd8a4b23e6858
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 5030a14451e6045698558f2ffb30c2d2, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 4e2ea85f8ed4f4f579fa62ad64735aa4, type: 2}

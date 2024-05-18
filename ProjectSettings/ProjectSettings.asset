@@ -13,7 +13,7 @@ PlayerSettings:
   useOnDemandResources: 0
   accelerometerFrequency: 60
   companyName: LorenzoLabs
-  productName: DreamHomeDesigner
+  productName: MVP-InteriorDesigner-XR
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -136,9 +136,11 @@ PlayerSettings:
   vulkanEnableLateAcquireNextImage: 0
   vulkanEnableCommandBufferRecycling: 1
   loadStoreDebugModeEnabled: 0
-  bundleVersion: 0.1.3a
+  bundleVersion: 0.1.0
   preloadedAssets:
   - {fileID: 11400000, guid: 7b92d542876ea4c9a846a29ae07744a8, type: 2}
+  - {fileID: 11400000, guid: 5030a14451e6045698558f2ffb30c2d2, type: 2}
+  - {fileID: 4502034924418447115, guid: 4e2ea85f8ed4f4f579fa62ad64735aa4, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -159,7 +161,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.LorenzoLabs.DreamHomeDesigner
+    Android: com.LorenzoLabs.MVPInteriorDesignerXR
   buildNumber:
     Standalone: 0
     VisionOS: 0
