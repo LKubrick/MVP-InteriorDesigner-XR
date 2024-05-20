@@ -21,9 +21,12 @@ public class MiniatureObjectController : MonoBehaviour
         Quaternion deltaRot = transform.rotation * Quaternion.Inverse(initialRotation);
 
         // Apply the delta to the corresponding life-size object
-        lifeSizeObject.position += (delta * multiplyFactor);
         initialPosition = transform.position;
-        lifeSizeObject.rotation = initialRotation * deltaRot;
         initialRotation = transform.rotation;
+        if (lifeSizeObject)
+        {
+            lifeSizeObject.position += (delta * multiplyFactor);
+            lifeSizeObject.rotation = initialRotation * deltaRot;
+        }
     }
 }

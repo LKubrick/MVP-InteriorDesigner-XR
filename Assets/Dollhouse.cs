@@ -121,9 +121,9 @@ public class Dollhouse : MonoBehaviour
                         var gb = newMiniObj.AddComponent<Grabbable>();
                     }
                     
-                    //var ctrl = newMiniObj.AddComponent<MiniatureObjectController>();
-                    //ctrl.multiplyFactor = 1.0f / _scalingFactor;
-                    //ctrl.lifeSizeObject = obj.transform;
+//                    var ctrl = newMiniObj.AddComponent<MiniatureObjectController>();
+//                    ctrl.multiplyFactor = 1.0f / _scalingFactor;
+//                    ctrl.lifeSizeObject = obj.transform;
 
                 }
             }
