@@ -26,13 +26,16 @@ public class Dollhouse : MonoBehaviour
     {
         if (isFirstTime)
         {
-            BuildDollhouse();  // maybe can move into Start() but playing it safe with lifecycle dependencies
+            StartCoroutine(BuildDollhouse());
+            isFirstTime = false;
         }
     }
 
-    void BuildDollhouse()
+    IEnumerator BuildDollhouse()
     {
+        yield return new WaitForSeconds(3);
         Debug.Log("trying to build dollhouse");
+        
         int cnt = 0;
         foreach (var room in MRUK.Instance.GetRooms())
         {
@@ -103,17 +106,25 @@ public class Dollhouse : MonoBehaviour
                 {
                     //newLargeObj = Instantiate(obj);
                     newMiniObj = Instantiate(obj);
-                    //var rb = newMiniObj.AddComponent<Rigidbody>();
-                    //var gb = newMiniObj.AddComponent<Grabbable>();
-                    //var collider = newMiniObj.AddComponent<BoxCollider>();
-                    //var ctrl = newMiniObj.AddComponent<MiniatureObjectController>();
-                    //ctrl.multiplyFactor = 1.0f / _scalingFactor;
-                    //ctrl.lifeSizeObject = obj.transform;
                     
                     newMiniObj.transform.localScale = new Vector3(_scalingFactor, _scalingFactor, _scalingFactor);
                     newMiniObj.transform.localPosition *= _scalingFactor;
                     
                     newMiniObj.transform.SetParent(_dollhouseOrigin.transform);
+                    
+                    var rb = newMiniObj.AddComponent<Rigidbody>();
+                    rb.isKinematic = true;
+
+                    var lowerCaseName = obj.name.ToLower();
+                    if (!(lowerCaseName.Contains("floor") || lowerCaseName.Contains("wall")))
+                    {
+                        var gb = newMiniObj.AddComponent<Grabbable>();
+                    }
+                    
+                    //var ctrl = newMiniObj.AddComponent<MiniatureObjectController>();
+                    //ctrl.multiplyFactor = 1.0f / _scalingFactor;
+                    //ctrl.lifeSizeObject = obj.transform;
+
                 }
             }
         }
