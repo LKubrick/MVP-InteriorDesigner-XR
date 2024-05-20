@@ -12,7 +12,6 @@ public class Dollhouse : MonoBehaviour
     [SerializeField] private float _scalingFactor;
     [SerializeField] private GameObject _prefabParent;
     [SerializeField] private GameObject _prefabFiller;  // cube object to stand in for a realistic prefab
-    private FancyResizer _resizer = new FancyResizer();
 
     private bool isFirstTime = true;
     // Start is called before the first frame update
