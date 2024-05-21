@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.52285874, g: 0.27471668, b: 0.78706604, a: 1}
+  m_IndirectSpecularColor: {r: 0.52257496, g: 0.27445304, b: 0.7867048, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -32760,7 +32760,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1812110616}
   - component: {fileID: 1812110618}
-  - component: {fileID: 1812110617}
   m_Layer: 0
   m_Name: WindowCamera
   m_TagString: Untagged
@@ -32783,14 +32782,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1745996865}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!81 &1812110617
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1812110615}
-  m_Enabled: 1
 --- !u!20 &1812110618
 Camera:
   m_ObjectHideFlags: 0
@@ -32802,7 +32793,7 @@ Camera:
   serializedVersion: 2
   m_ClearFlags: 1
   m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
-  m_projectionMatrixMode: 2
+  m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
   m_Iso: 200
@@ -32824,7 +32815,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 29
+  field of view: 60
   orthographic: 0
   orthographic size: 5
   m_Depth: 0
