@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using Meta.XR.MRUtilityKit;
 using Oculus.Interaction;
+using Oculus.Interaction.Grab;
+using Oculus.Interaction.HandGrab;
 using TMPro;
 using UnityEngine;
 
@@ -11,8 +13,7 @@ public class Dollhouse : MonoBehaviour
     [SerializeField] private GameObject _dollhouseOrigin;
     [SerializeField] private float _scalingFactor;
     [SerializeField] private GameObject _prefabParent;
-    [SerializeField] private GameObject _prefabFiller;  // cube object to stand in for a realistic prefab
-
+    [SerializeField] private HandGrabInteractable _handInteractableExemplar;
     private bool isFirstTime = true;
     // Start is called before the first frame update
     void Start()
@@ -42,7 +43,7 @@ public class Dollhouse : MonoBehaviour
             {
                 isFirstTime = false;
                 var obj = anchor.gameObject;
-                if (obj.name.Contains("CEILING"))
+                if (obj.name.Contains("CEILING") || obj.name.Contains("GLOBAL_MESH"))
                 {
                     Debug.Log($"Skipping {obj.name}");
                     continue;
@@ -52,78 +53,106 @@ public class Dollhouse : MonoBehaviour
                 var nameToSearch = obj.name;
                 GameObject prefab = null;
                 
-                /*
+                
                 // find the equivalent prefab
                 foreach (Transform child in _prefabParent.transform)
                 {
-                    // prefab hierarchy: the useable "sofa" prefab w/ Renderer is below the "sofa" placeholder parent
+                    // based on v65 Sample scene MRUK: Virtual Home
+                    // prefab hierarchy:
+                    //   the useable "sofa" prefab w/ MeshRenderer is below the "sofa" placeholder parent
+                    
                     if (nameToSearch.ToLower().Contains(child.gameObject.name.ToLower()))
                     {
                         Debug.Log($"prefab {child.gameObject.name} found for {obj.name}");
-                        var fancyResizable = child.gameObject.GetComponentInChildren<FancyResizable>();
-                        if (!fancyResizable)
+                        var meshRenderer = child.gameObject.GetComponentInChildren<MeshRenderer>();
+                        if (!meshRenderer)
                         {
-                            throw new Exception("no FancyResizable found for this object");
+                            throw new Exception("no MeshRenderer found under this parent");
                         }
-                        prefab = fancyResizable.gameObject;
+                        prefab = meshRenderer.gameObject;
                         if (prefab == null)
                         {
-                            throw new Exception("prefab is null");
-                        }
-                        if (!prefab.GetComponent<Renderer>())
-                        {
-                            throw new Exception("no Renderer found for this object");
+                            throw new Exception("prefab GameObject of MeshRenderer is null");
                         }
 
                         break;
                     }
-                }*/
-                prefab = null; // XXX hack for now
-                GameObject newLargeObj = null;
+                }
+
                 GameObject newMiniObj = null;
                 if (prefab != null)
                 {
-                    //var renderer = prefab.GetComponent<Renderer>();
-                    //newLargeObj = _resizer.CreateResizedObject(renderer.bounds.size, obj, prefab);
-                    //newMiniObj = _resizer.CreateResizedObject(renderer.bounds.size, _dollhouseOrigin, prefab);
-                    newLargeObj = Instantiate(prefab, obj.transform.position, obj.transform.rotation);
-                    var txt = newLargeObj.GetComponentInChildren<TMP_Text>();
-                    txt.text = obj.name;
-                    newLargeObj.transform.localScale = obj.GetComponent<Renderer>().bounds.size;
-
                     newMiniObj = Instantiate(prefab, obj.transform.position, obj.transform.rotation);
-                    var txt2 = newMiniObj.GetComponentInChildren<TMP_Text>();
-                    txt2.text = obj.name;
                     newMiniObj.transform.localScale = obj.GetComponent<Renderer>().bounds.size;
                     newMiniObj.transform.SetParent(_dollhouseOrigin.transform);
 
                     var miniObjCtrl = newMiniObj.GetComponent<MiniatureObjectController>();
                     miniObjCtrl.multiplyFactor = 1.0f / _scalingFactor;
-                    miniObjCtrl.lifeSizeObject = newLargeObj.transform;
+                    miniObjCtrl.lifeSizeObject = prefab.transform;
                 }
                 else
                 {
-                    //newLargeObj = Instantiate(obj);
                     newMiniObj = Instantiate(obj);
                     
                     newMiniObj.transform.localScale = new Vector3(_scalingFactor, _scalingFactor, _scalingFactor);
                     newMiniObj.transform.localPosition *= _scalingFactor;
                     
                     newMiniObj.transform.SetParent(_dollhouseOrigin.transform);
-                    
-                    var rb = newMiniObj.AddComponent<Rigidbody>();
-                    rb.isKinematic = true;
-
-                    var lowerCaseName = obj.name.ToLower();
-                    if (!(lowerCaseName.Contains("floor") || lowerCaseName.Contains("wall")))
-                    {
-                        var gb = newMiniObj.AddComponent<Grabbable>();
-                    }
-                    
 //                    var ctrl = newMiniObj.AddComponent<MiniatureObjectController>();
 //                    ctrl.multiplyFactor = 1.0f / _scalingFactor;
 //                    ctrl.lifeSizeObject = obj.transform;
+                }
+                
+                // prepare the new object
+                // add grabbable, rigidbody (to top-level object)
+                var topMiniObj = newMiniObj;
+                Rigidbody miniRb = null;
+                if (!(obj.name.Contains("WALL") || obj.name.Contains("FLOOR")))
+                {
+                    var grab = topMiniObj.AddComponent<Grabbable>();
+                    grab.InjectOptionalKinematicWhileSelected(true);
+                    grab.InjectOptionalThrowWhenUnselected(true);
+                    
+                    miniRb = topMiniObj.AddComponent<Rigidbody>();
+                    miniRb.useGravity = true;
+                    miniRb.mass = 1;
+                    
+                    miniRb.isKinematic = false;
+                    miniRb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+                }
 
+                var miniMeshRenderer = topMiniObj.gameObject.GetComponentInChildren<MeshRenderer>();
+                if (!miniMeshRenderer)
+                {
+                    throw new Exception("no MeshRenderer found under this parent");
+                }
+                var miniPrefab = miniMeshRenderer.gameObject;
+                if (miniPrefab == null)
+                {
+                    throw new Exception("miniprefab GameObject of MeshRenderer is null");
+                }
+                // add collider (to top level object)
+                var collider = topMiniObj.AddComponent<BoxCollider>();
+                if (!collider)
+                {
+                    throw new Exception("could not instantiate Collider for miniPrefab");
+                }
+
+                // rigidbody? Then we want to make it grabbable
+                if (miniRb)
+                {
+                    IPointableElement miniPrefabPointableElement = topMiniObj.GetComponent<IPointableElement>();
+                    if (miniPrefabPointableElement == null)
+                    {
+                        throw new Exception("no IPointableElement found");
+                    }
+                    // add HandgrabInteractable (to child of parent)
+                    var midMiniObj = Instantiate(_handInteractableExemplar);
+                    
+                    midMiniObj.InjectRigidbody(miniRb);
+                    midMiniObj.InjectSupportedGrabTypes(GrabTypeFlags.All);
+                    midMiniObj.InjectOptionalPointableElement(miniPrefabPointableElement);
+                    midMiniObj.transform.SetParent(topMiniObj.transform);
                 }
             }
         }
