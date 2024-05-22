@@ -98,13 +98,10 @@ public class Dollhouse : MonoBehaviour
                     newMiniObj.transform.localPosition *= _scalingFactor;
                     
                     newMiniObj.transform.SetParent(_dollhouseOrigin.transform);
-//                    var ctrl = newMiniObj.AddComponent<MiniatureObjectController>();
-//                    ctrl.multiplyFactor = 1.0f / _scalingFactor;
-//                    ctrl.lifeSizeObject = obj.transform;
                 }
                 
                 // prepare the new object
-                // add grabbable, rigidbody (to top-level object)
+                // add grabbable, rigidbody (to top-level object), and paired movement
                 var topMiniObj = newMiniObj;
                 Rigidbody miniRb = null;
                 if (!(obj.name.Contains("WALL") || obj.name.Contains("FLOOR")))
@@ -119,6 +116,11 @@ public class Dollhouse : MonoBehaviour
                     
                     miniRb.isKinematic = false;
                     miniRb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
+                    
+                    // allow paired-movement, mini -> large obj
+                    var ctrl = newMiniObj.AddComponent<MiniatureObjectController>();
+                    ctrl.multiplyFactor = 1.0f / _scalingFactor;
+                    ctrl.lifeSizeObject = obj.transform;
                 }
 
                 var miniMeshRenderer = topMiniObj.gameObject.GetComponentInChildren<MeshRenderer>();
