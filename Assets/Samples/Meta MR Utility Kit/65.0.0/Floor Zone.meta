@@ -1,5 +1,9 @@
 fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/Samples/Meta MR Utility Kit/65.0.0/Floor Zone.meta
 guid: b033868845e1748aa8c57fcdc89d5f1c
+========
+guid: 6258cea69cb3a14488e9aa13e4e336e8
+>>>>>>>> SceneUnderstanding_IsaacHo:Assets/Samples/Meta XR Core SDK/65.0.0.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

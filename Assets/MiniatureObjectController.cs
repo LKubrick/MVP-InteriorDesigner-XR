@@ -10,20 +10,28 @@ public class MiniatureObjectController : MonoBehaviour
     private void Start()
     {
         // Store the initial position of this object
-        initialPosition = transform.position;
-        initialRotation = transform.rotation;
+        initialPosition = transform.localPosition;
+        initialRotation = transform.localRotation;
     }
 
     private void FixedUpdate()
     {
         // Calculate the delta (current position - initial position)
-        Vector3 delta = transform.position - initialPosition;
-        Quaternion deltaRot = transform.rotation * Quaternion.Inverse(initialRotation);
+        Vector3 delta = transform.localPosition - initialPosition;
+        Quaternion deltaRot = transform.localRotation * Quaternion.Inverse(initialRotation);
+        initialPosition = transform.localPosition;
+        initialRotation = transform.localRotation;
 
-        // Apply the delta to the corresponding life-size object
-        lifeSizeObject.position += (delta * multiplyFactor);
-        initialPosition = transform.position;
-        lifeSizeObject.rotation = initialRotation * deltaRot;
-        initialRotation = transform.rotation;
+        // XXX check for rotation too
+        if (delta.magnitude > 0.001f)
+        {
+            // Apply the delta to the corresponding life-size object
+            if (lifeSizeObject)
+            {
+                lifeSizeObject.localPosition += (delta * multiplyFactor);
+                lifeSizeObject.localRotation = initialRotation * deltaRot;
+            }
+
+        }
     }
 }
