@@ -12,8 +12,9 @@ public class Dollhouse : MonoBehaviour
 {
     [SerializeField] private GameObject _dollhouseOrigin;
     [SerializeField] private float _scalingFactor;
-    [SerializeField] private GameObject _prefabParent;
-    [SerializeField] private HandGrabInteractable _handInteractableExemplar;
+    [SerializeField] private List<String> _namesToBuildFully;
+    [SerializeField] private List<String> _namesToBuildDollhouseOnly;
+    
     private bool isFirstTime = true;
     // Start is called before the first frame update
     void Start()
@@ -33,7 +34,7 @@ public class Dollhouse : MonoBehaviour
 
     IEnumerator BuildDollhouse()
     {
-        yield return new WaitForSeconds(3);
+        yield return new WaitForSeconds(2);
         Debug.Log("trying to build dollhouse");
         
         int cnt = 0;
@@ -43,68 +44,54 @@ public class Dollhouse : MonoBehaviour
             {
                 isFirstTime = false;
                 var obj = anchor.gameObject;
-                if (obj.name.Contains("CEILING") || obj.name.Contains("GLOBAL_MESH"))
+                var nameToSearch = obj.name.ToUpper();
+
+                bool isBuildFully = false;
+                bool isBuildDollhouseOnly = false;
+
+                // search lists for inclusion
+                foreach (String name in _namesToBuildFully)
                 {
-                    Debug.Log($"Skipping {obj.name}");
+                    if (nameToSearch.ToUpper().Contains(name.ToUpper()))
+                    {
+                        isBuildFully = true;
+                    }
+                }
+                foreach (String name in _namesToBuildDollhouseOnly)
+                {
+                    if (nameToSearch.ToUpper().Contains(name.ToUpper()))
+                    {
+                        isBuildDollhouseOnly = true;
+                    }
+                }
+                if (!(isBuildFully || isBuildDollhouseOnly))
+                {
+                    Debug.Log("skipping...do not build {obj.name}...deleting big object version");
+                    Destroy(obj);
                     continue;
                 }
 
+                if (isBuildDollhouseOnly)
+                {
+                    Debug.Log("building dollhouse only...deleting big object version");
+                    Destroy(obj);
+                }
                 Debug.Log($"trying to clone {obj.name}");
-                var nameToSearch = obj.name;
                 GameObject prefab = null;
-                
-                
-                // find the equivalent prefab
-                foreach (Transform child in _prefabParent.transform)
-                {
-                    // based on v65 Sample scene MRUK: Virtual Home
-                    // prefab hierarchy:
-                    //   the useable "sofa" prefab w/ MeshRenderer is below the "sofa" placeholder parent
-                    
-                    if (nameToSearch.ToLower().Contains(child.gameObject.name.ToLower()))
-                    {
-                        Debug.Log($"prefab {child.gameObject.name} found for {obj.name}");
-                        var meshRenderer = child.gameObject.GetComponentInChildren<MeshRenderer>();
-                        if (!meshRenderer)
-                        {
-                            throw new Exception("no MeshRenderer found under this parent");
-                        }
-                        prefab = meshRenderer.gameObject;
-                        if (prefab == null)
-                        {
-                            throw new Exception("prefab GameObject of MeshRenderer is null");
-                        }
-
-                        break;
-                    }
-                }
-
                 GameObject newMiniObj = null;
-                if (prefab != null)
-                {
-                    newMiniObj = Instantiate(prefab, obj.transform.position, obj.transform.rotation);
-                    newMiniObj.transform.localScale = obj.GetComponent<Renderer>().bounds.size;
-                    newMiniObj.transform.SetParent(_dollhouseOrigin.transform);
-
-                    var miniObjCtrl = newMiniObj.GetComponent<MiniatureObjectController>();
-                    miniObjCtrl.multiplyFactor = 1.0f / _scalingFactor;
-                    miniObjCtrl.lifeSizeObject = prefab.transform;
-                }
-                else
-                {
-                    newMiniObj = Instantiate(obj);
-                    
-                    newMiniObj.transform.localScale = new Vector3(_scalingFactor, _scalingFactor, _scalingFactor);
-                    newMiniObj.transform.localPosition *= _scalingFactor;
-                    
-                    newMiniObj.transform.SetParent(_dollhouseOrigin.transform);
-                }
+                newMiniObj = Instantiate(obj);
+                
+                newMiniObj.transform.localScale = new Vector3(_scalingFactor, _scalingFactor, _scalingFactor);
+                newMiniObj.transform.localPosition *= _scalingFactor;
+                
+                newMiniObj.transform.SetParent(_dollhouseOrigin.transform);
                 
                 // prepare the new object
                 // add grabbable, rigidbody (to top-level object), and paired movement
                 var topMiniObj = newMiniObj;
                 Rigidbody miniRb = null;
-                if (!(obj.name.Contains("WALL") || obj.name.Contains("FLOOR")))
+                bool isMakeGrabbable = isBuildFully;
+                if (isMakeGrabbable)
                 {
                     var grab = topMiniObj.AddComponent<Grabbable>();
                     grab.InjectOptionalKinematicWhileSelected(true);
@@ -140,8 +127,7 @@ public class Dollhouse : MonoBehaviour
                     throw new Exception("could not instantiate Collider for miniPrefab");
                 }
 
-                // rigidbody? Then we want to make it grabbable
-                if (miniRb)
+                if (isMakeGrabbable)
                 {
                     IPointableElement miniPrefabPointableElement = topMiniObj.GetComponent<IPointableElement>();
                     if (miniPrefabPointableElement == null)
@@ -149,12 +135,13 @@ public class Dollhouse : MonoBehaviour
                         throw new Exception("no IPointableElement found");
                     }
                     // add HandgrabInteractable (to child of parent)
-                    var midMiniObj = Instantiate(_handInteractableExemplar);
+                    var midMiniObj = new GameObject();
+                    var midMiniObjHgi = midMiniObj.AddComponent<HandGrabInteractable>();
                     
-                    midMiniObj.InjectRigidbody(miniRb);
-                    midMiniObj.InjectSupportedGrabTypes(GrabTypeFlags.All);
-                    midMiniObj.InjectOptionalPointableElement(miniPrefabPointableElement);
-                    midMiniObj.transform.SetParent(topMiniObj.transform);
+                    midMiniObjHgi.InjectRigidbody(miniRb);
+                    midMiniObjHgi.InjectSupportedGrabTypes(GrabTypeFlags.All);
+                    midMiniObjHgi.InjectOptionalPointableElement(miniPrefabPointableElement);
+                    midMiniObjHgi.transform.SetParent(topMiniObj.transform);
                 }
             }
         }
