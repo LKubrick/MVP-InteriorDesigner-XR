@@ -6,8 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="6ae48d36-8921-440a-a3e3-978ec2c054e1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MVP-InteriorDesigner-XR/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MVP-InteriorDesigner-XR/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Samples/Meta MR Utility Kit/64.0.0/Basic/MRUKBase.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Samples/Meta MR Utility Kit/64.0.0/Basic/MRUKBase.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/DollHouseBuilder.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/DollHouseBuilder.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/Table.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/Table.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/TwinBed.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/TwinBed.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Prefabs/White.mat" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Prefabs/White.mat" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/MRUKBase_YongwooPark.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/MRUKBase_YongwooPark.unity" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,6 +21,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/DollFurnitureController.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.mrutilitykit@64.0.0/Core/Scripts/AnchorPrefabSpawner.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.mrutilitykit@64.0.0/Core/Scripts/EffectMesh.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
@@ -98,7 +102,9 @@
       <workItem from="1716681556853" duration="540000" />
       <workItem from="1716683569368" duration="5278000" />
       <workItem from="1716689870320" duration="641000" />
-      <workItem from="1716691161613" duration="4940000" />
+      <workItem from="1716691161613" duration="6494000" />
+      <workItem from="1716698005237" duration="746000" />
+      <workItem from="1716698958869" duration="2258000" />
     </task>
     <servers />
   </component>
