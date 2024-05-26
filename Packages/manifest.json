@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.meta.xr.sdk.all": "65.0.0",
+    "com.meta.xr.sdk.all": "64.0.0",
     "com.meta.xr.sdk.interaction.ovr.samples": "65.0.0",
     "com.unity.ide.rider": "3.0.28",
     "com.unity.xr.management": "4.4.1",

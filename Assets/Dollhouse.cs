@@ -11,6 +11,8 @@ using UnityEngine;
 public class Dollhouse : MonoBehaviour
 {
     [SerializeField] private GameObject _dollhouseOrigin;
+    [SerializeField] private GameObject _leftHandAnchor;
+    [SerializeField] private Vector3 offsetFromLeftHand = new Vector3(1, 1, 1);
     [SerializeField] private float _scalingFactor;
     [SerializeField] private List<String> _namesToBuildFully;
     [SerializeField] private List<String> _namesToBuildDollhouseOnly;
@@ -31,7 +33,13 @@ public class Dollhouse : MonoBehaviour
             isFirstTime = false;
         }
     }
-
+   
+    private void FixedUpdate()
+    {
+        Vector3 newPosition = _leftHandAnchor.transform.position + offsetFromLeftHand;
+        _dollhouseOrigin.transform.position = newPosition;
+    }
+    
     IEnumerator BuildDollhouse()
     {
         yield return new WaitForSeconds(2);
