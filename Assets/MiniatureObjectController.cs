@@ -14,10 +14,14 @@ public class MiniatureObjectController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Calculate the delta (current position - initial position)
         Vector3 delta = transform.localPosition - initialPosition;
         initialPosition = transform.localPosition;
 
+        // Keep object horizontal XXX
+        //float yRotation = transform.localRotation.eulerAngles.y;
+        //Quaternion yRotationQtrn = Quaternion.Euler(0, yRotation, 0);
+        //transform.rotation = yRotationQtrn;
+        
         if (delta.magnitude > 0.001f)
         {
             // Apply the delta to the corresponding life-size object

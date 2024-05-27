@@ -14,8 +14,10 @@ public class Dollhouse : MonoBehaviour
     [SerializeField] private float _scalingFactor;
     [SerializeField] private List<String> _namesToBuildFully;
     [SerializeField] private List<String> _namesToBuildDollhouseOnly;
-    
+
+    private List<GameObject> _lineup = new List<GameObject>();  // furniture items left out of dollhouse
     private bool isFirstTime = true;
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -32,6 +34,56 @@ public class Dollhouse : MonoBehaviour
         }
     }
 
+    void AddToLineup(GameObject x)
+    {
+        _lineup.Add(x);
+        var rb = x.GetComponent<Rigidbody>();
+        rb.isKinematic = true;
+        
+        //ArrangeLineup();
+    }
+
+    private Vector3 gizmoPt1 = new Vector3(0f, 0f, 0f);
+    public Vector3 gizmoPt2 = new Vector3(0f,0f,0f);
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(gizmoPt1, gizmoPt2);
+    }
+
+    void ArrangeLineup()
+    {
+        Debug.Log($"Lineup: ");
+        foreach (GameObject x in _lineup)
+        {
+            Debug.Log($"{x.name}");
+        }
+        float spacer = .05f; // at room scale
+        Transform lineupOrigin = _dollhouseOrigin.transform;
+        float rotationAngle = -90f;
+        Vector3 lineupRotVector = Quaternion.AngleAxis(rotationAngle, Vector3.up)
+            * Camera.main.transform.forward;
+        lineupOrigin.transform.position = new Vector3(lineupOrigin.position.x, 
+            lineupOrigin.position.y, lineupOrigin.position.z);
+        lineupOrigin.transform.position += lineupRotVector * 0.5f;
+        
+        // XXX need to calculate total length of lineup, then recenter
+        
+        // XXX sort lineup by order in _namesToBuildFully
+
+        // enforce position in lineup
+        var myCursor = lineupOrigin.position;
+        foreach (GameObject x in _lineup)
+        {
+            var newPos = myCursor;
+            x.transform.position = newPos;
+            var renderer = x.GetComponentInChildren<MeshRenderer>();
+            var objWidth = renderer.bounds.size.x;
+            myCursor -= lineupRotVector * (objWidth + spacer);
+        }
+    }
+    
     IEnumerator BuildDollhouse()
     {
         yield return new WaitForSeconds(2);
@@ -66,16 +118,16 @@ public class Dollhouse : MonoBehaviour
                 }
                 if (!(isBuildFully || isBuildDollhouseOnly))
                 {
-                    Debug.Log("skipping...do not build {obj.name}...deleting big object version");
+                    Debug.Log($"skipping...do not build {obj.name}...deleting big object version");
                     Destroy(obj);
                     continue;
-                }
-
-                if (isBuildDollhouseOnly)
+                } 
+                else if (isBuildDollhouseOnly)
                 {
-                    Debug.Log("building dollhouse only...deleting big object version");
+                    Debug.Log($"building dollhouse only for {obj.name}...deleting big object version");
                     Destroy(obj);
                 }
+
                 Debug.Log($"trying to clone {obj.name}");
                 GameObject prefab = null;
                 GameObject newMiniObj = null;
@@ -83,9 +135,10 @@ public class Dollhouse : MonoBehaviour
                 
                 newMiniObj.transform.localScale = new Vector3(_scalingFactor, _scalingFactor, _scalingFactor);
                 newMiniObj.transform.localPosition *= _scalingFactor;
-                
                 newMiniObj.transform.SetParent(_dollhouseOrigin.transform);
-                
+
+                Debug.Log($"Initial position {nameToSearch}: {obj.transform.position}");
+
                 // prepare the new object
                 // add grabbable, rigidbody (to top-level object), and paired movement
                 var topMiniObj = newMiniObj;
@@ -93,6 +146,8 @@ public class Dollhouse : MonoBehaviour
                 bool isMakeGrabbable = isBuildFully;
                 if (isMakeGrabbable)
                 {
+                    Debug.Log($"make grabbable {obj.name}");
+
                     var grab = topMiniObj.AddComponent<Grabbable>();
                     grab.InjectOptionalKinematicWhileSelected(true);
                     grab.InjectOptionalThrowWhenUnselected(true);
@@ -126,7 +181,6 @@ public class Dollhouse : MonoBehaviour
                 {
                     throw new Exception("could not instantiate Collider for miniPrefab");
                 }
-
                 if (isMakeGrabbable)
                 {
                     IPointableElement miniPrefabPointableElement = topMiniObj.GetComponent<IPointableElement>();
@@ -142,11 +196,15 @@ public class Dollhouse : MonoBehaviour
                     midMiniObjHgi.InjectSupportedGrabTypes(GrabTypeFlags.All);
                     midMiniObjHgi.InjectOptionalPointableElement(miniPrefabPointableElement);
                     midMiniObjHgi.transform.SetParent(topMiniObj.transform);
+                    
+                    AddToLineup(newMiniObj);
                 }
             }
         }
 
         Debug.Log($"{cnt} objects cloned...scaling down...");
         _dollhouseOrigin.transform.localScale = new Vector3(_scalingFactor, _scalingFactor, _scalingFactor);
+        
+        ArrangeLineup();
     }
 }
