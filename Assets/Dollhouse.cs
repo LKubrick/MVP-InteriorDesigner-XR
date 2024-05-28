@@ -15,13 +15,16 @@ public class Dollhouse : MonoBehaviour
     [SerializeField] private List<String> _namesToBuildFully;
     [SerializeField] private List<String> _namesToBuildDollhouseOnly;
 
+    private Dictionary<GameObject,Vector3> _initialPositionsForMiniObj;
+    private Dictionary<GameObject,Quaternion> _initialRotationsForMiniObj;
     private List<GameObject> _lineup = new List<GameObject>();  // furniture items left out of dollhouse
     private bool isFirstTime = true;
     
     // Start is called before the first frame update
     void Start()
     {
-        
+        _initialPositionsForMiniObj = new Dictionary<GameObject,Vector3>();
+        _initialRotationsForMiniObj = new Dictionary<GameObject,Quaternion>();
     }
     
     // Update is called once per frame
@@ -34,25 +37,43 @@ public class Dollhouse : MonoBehaviour
         }
     }
 
-    void AddToLineup(GameObject x)
+    public void AddToLineup(GameObject x, bool callArrangeLineup = true)
     {
         _lineup.Add(x);
         var rb = x.GetComponent<Rigidbody>();
         rb.isKinematic = true;
-        
-        //ArrangeLineup();
+
+        if (callArrangeLineup)
+        {
+            ArrangeLineup();
+        }
     }
 
     private Vector3 gizmoPt1 = new Vector3(0f, 0f, 0f);
     public Vector3 gizmoPt2 = new Vector3(0f,0f,0f);
 
+    public Vector3 GetInitialPosition(GameObject x)
+    {
+        return _initialPositionsForMiniObj[x];
+    }
+    
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawLine(gizmoPt1, gizmoPt2);
     }
 
-    void ArrangeLineup()
+    void SetMiniObjInitialTransforms()
+    {
+        foreach (GameObject x in _lineup)
+        {
+            Transform trans = x.transform;
+            Debug.Log($"setting initial transform for {x.name} -> {x.transform.position}");
+            _initialPositionsForMiniObj[x] = trans.localPosition;
+            _initialRotationsForMiniObj[x] = trans.localRotation;
+        }
+    }
+    private void ArrangeLineup()
     {
         Debug.Log($"Lineup: ");
         foreach (GameObject x in _lineup)
@@ -82,6 +103,34 @@ public class Dollhouse : MonoBehaviour
             var objWidth = renderer.bounds.size.x;
             myCursor -= lineupRotVector * (objWidth + spacer);
         }
+    }
+
+    public bool IsInLineup(GameObject obj)
+    {
+        return _lineup.Contains(obj);
+    }
+
+    public void AddToScene(GameObject miniObj)
+    {
+        Debug.Log($"AddToScene: {miniObj.name}");
+        _lineup.Remove(miniObj);
+        var origPos = _initialPositionsForMiniObj[miniObj];
+        var origRot = _initialRotationsForMiniObj[miniObj];
+        Debug.Log($"AddToScene: setting initial transform for {miniObj.name} -> {origPos} {origRot}");
+
+        miniObj.transform.localPosition = origPos;
+        miniObj.transform.localRotation = origRot;
+        
+        var rb = miniObj.GetComponent<Rigidbody>();
+        //rb.isKinematic = false; keep it kinematic the whole time
+    }
+
+    // do this to make sure coords are set correctly after BuildDollhouse() is called
+    IEnumerator ArrangeInitialLineup()
+    {
+        yield return new WaitForSeconds(0.5f);
+        SetMiniObjInitialTransforms(); 
+        ArrangeLineup(); 
     }
     
     IEnumerator BuildDollhouse()
@@ -138,7 +187,7 @@ public class Dollhouse : MonoBehaviour
                 newMiniObj.transform.SetParent(_dollhouseOrigin.transform);
 
                 Debug.Log($"Initial position {nameToSearch}: {obj.transform.position}");
-
+                
                 // prepare the new object
                 // add grabbable, rigidbody (to top-level object), and paired movement
                 var topMiniObj = newMiniObj;
@@ -163,6 +212,7 @@ public class Dollhouse : MonoBehaviour
                     var ctrl = newMiniObj.AddComponent<MiniatureObjectController>();
                     ctrl.multiplyFactor = 1.0f / _scalingFactor;
                     ctrl.lifeSizeObject = obj.transform;
+                    ctrl._dollhouse = this;
                 }
 
                 var miniMeshRenderer = topMiniObj.gameObject.GetComponentInChildren<MeshRenderer>();
@@ -197,14 +247,14 @@ public class Dollhouse : MonoBehaviour
                     midMiniObjHgi.InjectOptionalPointableElement(miniPrefabPointableElement);
                     midMiniObjHgi.transform.SetParent(topMiniObj.transform);
                     
-                    AddToLineup(newMiniObj);
+                    AddToLineup(newMiniObj, false);
                 }
             }
         }
 
         Debug.Log($"{cnt} objects cloned...scaling down...");
         _dollhouseOrigin.transform.localScale = new Vector3(_scalingFactor, _scalingFactor, _scalingFactor);
-        
-        ArrangeLineup();
+
+        StartCoroutine(ArrangeInitialLineup());
     }
 }
