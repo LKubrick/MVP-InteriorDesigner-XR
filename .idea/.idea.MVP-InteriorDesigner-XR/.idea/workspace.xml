@@ -8,18 +8,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MVP-InteriorDesigner-XR/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MVP-InteriorDesigner-XR/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Dollhouse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dollhouse.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/MiniatureObjectController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/MiniatureObjectController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Oculus/OculusProjectConfig.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Oculus/OculusProjectConfig.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/OVRBuildConfig.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/OVRBuildConfig.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Resources/OVRBuildConfig.asset.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Resources/OVRBuildConfig.asset.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Samples/Meta MR Utility Kit/65.0.0/Virtual Home.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Samples/Meta MR Utility Kit/65.0.0/Virtual Home.meta" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Samples/Meta MR Utility Kit/65.0.0/Virtual Home/VirtualHome.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Samples/Meta MR Utility Kit/65.0.0/Virtual Home/VirtualHome.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/IsaacHo_VirtualHome.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/IsaacHo_VirtualHome.unity" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/manifest.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/DynamicsManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/DynamicsManager.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/TagManager.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,10 +75,10 @@
       <option name="USE_EXTERNAL_CONSOLE" value="0" />
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor &amp; Play" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="UNITY_ATTACH_AND_PLAY" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
+    <configuration name="Attach to Unity Editor &amp; Play" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="UNITY_ATTACH_AND_PLAY" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="24316">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" />
+      <option name="pid" value="24316" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
@@ -122,7 +110,7 @@
       <workItem from="1716834283584" duration="4942000" />
       <workItem from="1716844110278" duration="2017000" />
       <workItem from="1716846188785" duration="9766000" />
-      <workItem from="1716857109540" duration="4489000" />
+      <workItem from="1716857109540" duration="14144000" />
     </task>
     <servers />
   </component>
@@ -133,5 +121,24 @@
   <component name="UnityUnitTestConfiguration" currentTestLauncher="Both" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/Assets/MiniatureObjectController.cs</url>
+          <line>61</line>
+          <properties documentPath="C:\Users\user\Documents\GitHub\MVP-InteriorDesigner-XR\Assets\MiniatureObjectController.cs" initialLine="61" containingFunctionPresentation="Method 'FixedUpdate'">
+            <startOffsets>
+              <option value="1903" />
+            </startOffsets>
+            <endOffsets>
+              <option value="1985" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

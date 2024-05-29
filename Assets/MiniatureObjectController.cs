@@ -9,7 +9,7 @@ public class MiniatureObjectController : MonoBehaviour
     public Dollhouse _dollhouse;
     public Transform lifeSizeObject; // Assign this in the Inspector
     public float multiplyFactor = 8f;
-
+    public float initialYLocalPosLifesizeObject; // this is a hack -- was getting placed too high upon user release
     private bool isBeingGrabbed = false;
     
     private void Start()
@@ -28,15 +28,29 @@ public class MiniatureObjectController : MonoBehaviour
         }
         return false;
     }
+
+    Bounds CalculateBoundingBox(GameObject obj)
+    {
+        var renderers = gameObject.GetComponentsInChildren<Renderer>();
+        var bounds = renderers[0].bounds;
+        for (var i = 1; i < renderers.Length; ++i)
+        {
+            bounds.Encapsulate(renderers[i].bounds);
+        }
+
+        return bounds;
+    }
     
     private void FixedUpdate()
     {
         Vector3 delta = transform.localPosition - initialPosition;
         initialPosition = transform.localPosition;
-        
+
         // trap the release of an object
         if (isBeingGrabbed && !IsBeingGrabbed())
         {
+            isBeingGrabbed = IsBeingGrabbed();
+
             if (_dollhouse.IsInLineup(gameObject))
             {
                 _dollhouse.AddToScene(gameObject);
@@ -44,36 +58,36 @@ public class MiniatureObjectController : MonoBehaviour
             }
             else
             {
-                // XXX check outside dollhouse bounds
-                if (gameObject.transform.position.y < 1.0f)
+                // check if outside dollhouse bounds - project onto 2d x-z plane of floor
+                bool isBelowFloor = transform.position.y < _dollhouse._floor.transform.position.y;
+                if (isBelowFloor)
                 {
-//                    _dollhouse.AddToLineup(gameObject);
-  //                  return;
-                } 
-                
+                    _dollhouse.AddToLineup(gameObject);
+                    return;
+                }
+
                 //snap to floor
-    //            var initialPos = _dollhouse.GetInitialPosition(gameObject);
-     //           var newPos = new Vector3(transform.localPosition.x, initialPos.y, transform.localPosition.z);
-       //         transform.localPosition = newPos;
+                var initialPos = _dollhouse.GetInitialPosition(gameObject);
+                var newPos = new Vector3(transform.localPosition.x, initialPos.y, transform.localPosition.z);
+                float xRotation = -90f; // empirically, what seems to work in our scene
+                float yRotation = transform.localRotation.eulerAngles.y;
+                float zRotation = transform.localRotation.eulerAngles.z;
+                Quaternion rotationQtrn = Quaternion.Euler(xRotation, yRotation, zRotation);
+                transform.localRotation = rotationQtrn;
+                transform.localPosition = newPos;
             }
         }
-        isBeingGrabbed = IsBeingGrabbed();
-        
-        // Keep object horizontal XXX
-        //float xRotation = transform.localRotation.eulerAngles.x;
-        //float zRotation = transform.localRotation.eulerAngles.z;
-        //Quaternion yRotationQtrn = Quaternion.Euler(xRotation, 0, zRotation);
-        //transform.rotation = yRotationQtrn;
-        
-        if (delta.magnitude > 0.001f)
+        else
         {
-            // Apply the delta to the corresponding life-size object
-            if (lifeSizeObject)
-            {
-                lifeSizeObject.localPosition += (delta * multiplyFactor);
-                lifeSizeObject.localRotation = transform.localRotation;
-            }
-
+            isBeingGrabbed = IsBeingGrabbed();
+        }
+        // Apply the delta to the corresponding life-size object
+        if (lifeSizeObject)
+        {
+            lifeSizeObject.localPosition += delta * multiplyFactor;
+            lifeSizeObject.localRotation = transform.localRotation;
+            var p = lifeSizeObject.localPosition;
+            lifeSizeObject.localPosition = new Vector3(p.x, initialYLocalPosLifesizeObject, p.z);
         }
     }
 }

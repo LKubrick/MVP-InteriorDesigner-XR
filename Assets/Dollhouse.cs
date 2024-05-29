@@ -15,11 +15,14 @@ public class Dollhouse : MonoBehaviour
     [SerializeField] private List<String> _namesToBuildFully;
     [SerializeField] private List<String> _namesToBuildDollhouseOnly;
 
+    private Vector3 lineupRotVector;
+    private bool isLineupRotVectorDefined = false;
     private Dictionary<GameObject,Vector3> _initialPositionsForMiniObj;
     private Dictionary<GameObject,Quaternion> _initialRotationsForMiniObj;
     private List<GameObject> _lineup = new List<GameObject>();  // furniture items left out of dollhouse
     private bool isFirstTime = true;
-    
+    public GameObject _floor;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -42,6 +45,9 @@ public class Dollhouse : MonoBehaviour
         _lineup.Add(x);
         var rb = x.GetComponent<Rigidbody>();
         rb.isKinematic = true;
+        var miniObjCtrl = x.GetComponentInChildren<MiniatureObjectController>();
+        var lifesizeObj = miniObjCtrl.lifeSizeObject.gameObject;
+        lifesizeObj.SetActive(false);
 
         if (callArrangeLineup)
         {
@@ -49,20 +55,11 @@ public class Dollhouse : MonoBehaviour
         }
     }
 
-    private Vector3 gizmoPt1 = new Vector3(0f, 0f, 0f);
-    public Vector3 gizmoPt2 = new Vector3(0f,0f,0f);
-
     public Vector3 GetInitialPosition(GameObject x)
     {
         return _initialPositionsForMiniObj[x];
     }
     
-    private void OnDrawGizmos()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawLine(gizmoPt1, gizmoPt2);
-    }
-
     void SetMiniObjInitialTransforms()
     {
         foreach (GameObject x in _lineup)
@@ -81,28 +78,50 @@ public class Dollhouse : MonoBehaviour
             Debug.Log($"{x.name}");
         }
         float spacer = .05f; // at room scale
-        Transform lineupOrigin = _dollhouseOrigin.transform;
+        Vector3 lineupOriginPos = _dollhouseOrigin.transform.position;
         float rotationAngle = -90f;
-        Vector3 lineupRotVector = Quaternion.AngleAxis(rotationAngle, Vector3.up)
-            * Camera.main.transform.forward;
-        lineupOrigin.transform.position = new Vector3(lineupOrigin.position.x, 
-            lineupOrigin.position.y, lineupOrigin.position.z);
-        lineupOrigin.transform.position += lineupRotVector * 0.5f;
-        
-        // XXX need to calculate total length of lineup, then recenter
+
+        if (!isLineupRotVectorDefined)
+        {
+            lineupRotVector = Quaternion.AngleAxis(rotationAngle, Vector3.up)
+                              * Camera.main.transform.forward;
+            isLineupRotVectorDefined = true;
+        }
+        lineupOriginPos = new Vector3(lineupOriginPos.x, 
+            lineupOriginPos.y, lineupOriginPos.z);
+        lineupOriginPos += lineupRotVector * 0.5f;
         
         // XXX sort lineup by order in _namesToBuildFully
-
-        // enforce position in lineup
-        var myCursor = lineupOrigin.position;
+        
+        // calculate the lineup width empirically
+        var myCursor = lineupOriginPos;
         foreach (GameObject x in _lineup)
         {
+            var newPos = myCursor;
+            //x.transform.position = newPos;
+            var renderer = x.GetComponentInChildren<MeshRenderer>();
+            var objWidth = renderer.bounds.size.x;
+            myCursor -= lineupRotVector * (objWidth + spacer);
+        }
+        var lineupWidthVector = myCursor - lineupOriginPos;
+        var lineupWidth = lineupWidthVector.magnitude;
+
+        // center the lineup
+        lineupOriginPos = _dollhouseOrigin.transform.position;
+        lineupOriginPos += lineupRotVector * 0.5f * lineupWidth;
+
+        // layout the mini furniture
+        myCursor = lineupOriginPos;
+        foreach (GameObject x in _lineup)
+        {
+            Debug.Log($"ArrangeLineup: {x.name}");
             var newPos = myCursor;
             x.transform.position = newPos;
             var renderer = x.GetComponentInChildren<MeshRenderer>();
             var objWidth = renderer.bounds.size.x;
             myCursor -= lineupRotVector * (objWidth + spacer);
         }
+        
     }
 
     public bool IsInLineup(GameObject obj)
@@ -123,6 +142,10 @@ public class Dollhouse : MonoBehaviour
         
         var rb = miniObj.GetComponent<Rigidbody>();
         //rb.isKinematic = false; keep it kinematic the whole time
+
+        var miniObjCtrl = miniObj.GetComponentInChildren<MiniatureObjectController>();
+        var lifesizeObj = miniObjCtrl.lifeSizeObject.gameObject;
+        lifesizeObj.SetActive(true);
     }
 
     // do this to make sure coords are set correctly after BuildDollhouse() is called
@@ -213,6 +236,7 @@ public class Dollhouse : MonoBehaviour
                     ctrl.multiplyFactor = 1.0f / _scalingFactor;
                     ctrl.lifeSizeObject = obj.transform;
                     ctrl._dollhouse = this;
+                    ctrl.initialYLocalPosLifesizeObject = obj.transform.localPosition.y;
                 }
 
                 var miniMeshRenderer = topMiniObj.gameObject.GetComponentInChildren<MeshRenderer>();
@@ -248,6 +272,12 @@ public class Dollhouse : MonoBehaviour
                     midMiniObjHgi.transform.SetParent(topMiniObj.transform);
                     
                     AddToLineup(newMiniObj, false);
+                }
+                
+                // treat FLOOR specially
+                if (nameToSearch.Contains("FLOOR"))
+                {
+                    _floor = topMiniObj;
                 }
             }
         }
