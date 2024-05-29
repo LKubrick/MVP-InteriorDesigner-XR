@@ -5322,7 +5322,7 @@ MonoBehaviour:
   _editor: {fileID: 372071145}
   _width: 0.1
   _height: 0.1
-  _color: {r: 1, g: 1, b: 1, a: 1}
+  _color: {r: 0.4706282, g: 0.8207547, b: 0.2206746, a: 1}
   _borderColor: {r: 0, g: 0, b: 0, a: 1}
   _radiusTopLeft: 0
   _radiusTopRight: 0

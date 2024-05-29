@@ -107,12 +107,13 @@ public class Dollhouse : MonoBehaviour
         }
         float spacer = .05f; // at room scale
         Vector3 lineupOriginPos = _dollhouseOrigin.transform.position;
-        float rotationAngle = -90f;
+        float rotationAngle = 0f; //-90f;
 
         if (!isLineupRotVectorDefined)
         {
             lineupRotVector = Quaternion.AngleAxis(rotationAngle, Vector3.up)
                               * Camera.main.transform.forward;
+            lineupRotVector = new Vector3(lineupRotVector.x, 0, lineupRotVector.z);
             isLineupRotVectorDefined = true;
         }
         lineupOriginPos = new Vector3(lineupOriginPos.x, 
