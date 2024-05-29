@@ -14,7 +14,9 @@ public class Dollhouse : MonoBehaviour
     [SerializeField] private float _scalingFactor;
     [SerializeField] private List<String> _namesToBuildFully;
     [SerializeField] private List<String> _namesToBuildDollhouseOnly;
-
+    [SerializeField] private OVRPassthroughLayer _passthrough;
+    
+    private List<GameObject> dollhouseOnlyLargeItems = new List<GameObject>();
     private Vector3 lineupRotVector;
     private bool isLineupRotVectorDefined = false;
     private Dictionary<GameObject,Vector3> _initialPositionsForMiniObj;
@@ -58,6 +60,25 @@ public class Dollhouse : MonoBehaviour
     public Vector3 GetInitialPosition(GameObject x)
     {
         return _initialPositionsForMiniObj[x];
+    }
+
+    private bool isVRMode = true;
+    public void ToggleVRMode()
+    {
+        isVRMode = !isVRMode;
+        
+        var passthroughpct = 1f;
+        bool isActiveFlag = false;
+        if (isVRMode)
+        {
+            passthroughpct = 0f;
+            isActiveFlag = true;
+        }
+        _passthrough.textureOpacity = passthroughpct;
+        foreach (GameObject x in dollhouseOnlyLargeItems)
+        {
+            x.SetActive(isActiveFlag);
+        }
     }
     
     void SetMiniObjInitialTransforms()
@@ -121,7 +142,6 @@ public class Dollhouse : MonoBehaviour
             var objWidth = renderer.bounds.size.x;
             myCursor -= lineupRotVector * (objWidth + spacer);
         }
-        
     }
 
     public bool IsInLineup(GameObject obj)
@@ -190,14 +210,14 @@ public class Dollhouse : MonoBehaviour
                 }
                 if (!(isBuildFully || isBuildDollhouseOnly))
                 {
-                    Debug.Log($"skipping...do not build {obj.name}...deleting big object version");
+                    Debug.Log($"skipping...do not build {obj.name}...destroying big object version");
                     Destroy(obj);
                     continue;
                 } 
                 else if (isBuildDollhouseOnly)
                 {
                     Debug.Log($"building dollhouse only for {obj.name}...deleting big object version");
-                    Destroy(obj);
+                    dollhouseOnlyLargeItems.Add(obj);
                 }
 
                 Debug.Log($"trying to clone {obj.name}");

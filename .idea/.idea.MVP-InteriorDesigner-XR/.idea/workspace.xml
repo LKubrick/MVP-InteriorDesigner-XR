@@ -7,7 +7,7 @@
     <list default="true" id="6ae48d36-8921-440a-a3e3-978ec2c054e1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MVP-InteriorDesigner-XR/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MVP-InteriorDesigner-XR/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Assets/Dollhouse.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Dollhouse.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/MiniatureObjectController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/MiniatureObjectController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Scenes/IsaacHo_VirtualHome.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/IsaacHo_VirtualHome.unity" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,6 +25,7 @@
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.interaction@65.0.0/Runtime/Scripts/Input/Hands/HandPhysicsCapsules.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.interaction@65.0.0/Runtime/Scripts/Input/Hands/ShadowHand.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.interaction@65.0.0/Runtime/Scripts/Input/OneEuroFilter/FilteredTransform.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.interaction@65.0.0/Runtime/Scripts/Interaction/Models/Poke/PokeInteractable.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -75,10 +76,10 @@
       <option name="USE_EXTERNAL_CONSOLE" value="0" />
       <method v="2" />
     </configuration>
-    <configuration name="Attach to Unity Editor &amp; Play" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="UNITY_ATTACH_AND_PLAY" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" ignored-value-for-modified-check="24316">
+    <configuration name="Attach to Unity Editor &amp; Play" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="UNITY_ATTACH_AND_PLAY" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost">
       <option name="allowRunningInParallel" value="false" />
       <option name="listenPortForConnections" value="false" />
-      <option name="pid" value="24316" />
+      <option name="pid" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
@@ -110,7 +111,10 @@
       <workItem from="1716834283584" duration="4942000" />
       <workItem from="1716844110278" duration="2017000" />
       <workItem from="1716846188785" duration="9766000" />
-      <workItem from="1716857109540" duration="14144000" />
+      <workItem from="1716857109540" duration="15602000" />
+      <workItem from="1716945210470" duration="653000" />
+      <workItem from="1716945921184" duration="352000" />
+      <workItem from="1716992709938" duration="1305000" />
     </task>
     <servers />
   </component>
