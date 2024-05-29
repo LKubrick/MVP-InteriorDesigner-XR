@@ -63,10 +63,11 @@ public class Dollhouse : MonoBehaviour
     }
 
     private bool isVRMode = true;
+
     public void ToggleVRMode()
     {
         isVRMode = !isVRMode;
-        
+
         var passthroughpct = 1f;
         bool isActiveFlag = false;
         if (isVRMode)
@@ -74,11 +75,17 @@ public class Dollhouse : MonoBehaviour
             passthroughpct = 0f;
             isActiveFlag = true;
         }
+
         _passthrough.textureOpacity = passthroughpct;
         foreach (GameObject x in dollhouseOnlyLargeItems)
         {
             x.SetActive(isActiveFlag);
         }
+    }
+
+    void OnVRToggleButton()
+    {
+        ToggleVRMode();
     }
     
     void SetMiniObjInitialTransforms()
@@ -137,7 +144,9 @@ public class Dollhouse : MonoBehaviour
         {
             Debug.Log($"ArrangeLineup: {x.name}");
             var newPos = myCursor;
+            var newRot = _initialRotationsForMiniObj[x];
             x.transform.position = newPos;
+            x.transform.rotation = newRot;
             var renderer = x.GetComponentInChildren<MeshRenderer>();
             var objWidth = renderer.bounds.size.x;
             myCursor -= lineupRotVector * (objWidth + spacer);

@@ -26,6 +26,7 @@
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.interaction@65.0.0/Runtime/Scripts/Input/Hands/ShadowHand.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.interaction@65.0.0/Runtime/Scripts/Input/OneEuroFilter/FilteredTransform.cs" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.interaction@65.0.0/Runtime/Scripts/Interaction/Models/Poke/PokeInteractable.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Library/PackageCache/com.meta.xr.sdk.interaction@65.0.0/Runtime/Scripts/Interaction/Models/Poke/Visuals/PokeInteractableVisual.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -114,7 +115,7 @@
       <workItem from="1716857109540" duration="15602000" />
       <workItem from="1716945210470" duration="653000" />
       <workItem from="1716945921184" duration="352000" />
-      <workItem from="1716992709938" duration="1305000" />
+      <workItem from="1716992709938" duration="3933000" />
     </task>
     <servers />
   </component>
