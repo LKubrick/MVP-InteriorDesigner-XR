@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Meta.XR.MRUtilityKit;
@@ -15,13 +16,18 @@ public class Dollhouse : MonoBehaviour
     [SerializeField] private List<String> _namesToBuildFully;
     [SerializeField] private List<String> _namesToBuildDollhouseOnly;
     [SerializeField] private OVRPassthroughLayer _passthrough;
+    [SerializeField] private GameObject _lineupHolder;
     
     private List<GameObject> dollhouseOnlyLargeItems = new List<GameObject>();
     private Vector3 lineupRotVector;
     private bool isLineupRotVectorDefined = false;
     private Dictionary<GameObject,Vector3> _initialPositionsForMiniObj;
     private Dictionary<GameObject,Quaternion> _initialRotationsForMiniObj;
-    private List<GameObject> _lineup = new List<GameObject>();  // furniture items left out of dollhouse
+    
+    // each mini obj is always either in lineup or scene
+    private List<GameObject> _lineup = new List<GameObject>();  //  items left out of dollhouse
+    private List<GameObject> _scene = new List<GameObject>(); // items placed in the dollhouse
+    
     private bool isFirstTime = true;
     public GameObject _floor;
 
@@ -31,10 +37,78 @@ public class Dollhouse : MonoBehaviour
         _initialPositionsForMiniObj = new Dictionary<GameObject,Vector3>();
         _initialRotationsForMiniObj = new Dictionary<GameObject,Quaternion>();
     }
+
+    IEnumerable<GameObject> GetAllMiniObjects()
+    {
+        return _lineup.Concat(_scene); // clones the list
+    }
+
+    // layout state
+    struct LayoutData
+    {
+        public Vector3 pos { get; set; }
+        public Quaternion rot { get; set; }
+    }
+    Dictionary<GameObject, LayoutData>[] savedLayouts = new Dictionary<GameObject, LayoutData>[3];
+    
+    // trigger events from unity editor
+    void DebugHotKeys()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            AddToScene(_lineup.First());
+            ArrangeLineup();
+        }
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            AddToLineup(_scene.First(), true);
+        }
+        
+        int layoutIdx = 0;
+        if (Input.GetKeyDown(KeyCode.A)) // replay layout
+        {
+            // clone the list bc we will clear lineup and scene immediately
+            var allObj = new List<GameObject>(GetAllMiniObjects());
+            _lineup.Clear();
+            _scene.Clear();
+            foreach (var x in allObj)
+            {
+                AddToLineup(x);
+
+                if (savedLayouts[layoutIdx].ContainsKey(x))
+                {
+                    Debug.Log($"saved layout found for {x} adding to scene");
+                    var data = savedLayouts[layoutIdx][x];
+                    _initialPositionsForMiniObj[x] = data.pos;
+                    _initialRotationsForMiniObj[x] = data.rot;
+                    AddToScene(x);
+                }
+            }
+            ArrangeLineup();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Z)) // save layout
+        {
+            savedLayouts[layoutIdx] = new Dictionary<GameObject, LayoutData>();
+            foreach (var obj in _scene)
+            {
+                LayoutData layoutData = new LayoutData
+                {
+                    pos = obj.transform.localPosition, rot = obj.transform.localRotation
+                };
+                savedLayouts[layoutIdx][obj] = layoutData;
+            }
+
+            var cnt = savedLayouts[layoutIdx].Count();
+            Debug.Log($"savedLayouts: {cnt}");
+        }
+    }
     
     // Update is called once per frame
     void Update()
     {
+        DebugHotKeys();
         if (isFirstTime)
         {
             StartCoroutine(BuildDollhouse());
@@ -45,6 +119,7 @@ public class Dollhouse : MonoBehaviour
     public void AddToLineup(GameObject x, bool callArrangeLineup = true)
     {
         _lineup.Add(x);
+        _scene.Remove(x);
         var rb = x.GetComponent<Rigidbody>();
         rb.isKinematic = true;
         var miniObjCtrl = x.GetComponentInChildren<MiniatureObjectController>();
@@ -63,11 +138,10 @@ public class Dollhouse : MonoBehaviour
     }
 
     private bool isVRMode = true;
-
     public void ToggleVRMode()
     {
         isVRMode = !isVRMode;
-
+        
         var passthroughpct = 1f;
         bool isActiveFlag = false;
         if (isVRMode)
@@ -75,17 +149,11 @@ public class Dollhouse : MonoBehaviour
             passthroughpct = 0f;
             isActiveFlag = true;
         }
-
         _passthrough.textureOpacity = passthroughpct;
         foreach (GameObject x in dollhouseOnlyLargeItems)
         {
             x.SetActive(isActiveFlag);
         }
-    }
-
-    void OnVRToggleButton()
-    {
-        ToggleVRMode();
     }
     
     void SetMiniObjInitialTransforms()
@@ -100,20 +168,15 @@ public class Dollhouse : MonoBehaviour
     }
     private void ArrangeLineup()
     {
-        Debug.Log($"Lineup: ");
-        foreach (GameObject x in _lineup)
-        {
-            Debug.Log($"{x.name}");
-        }
+        Debug.Log($"Lineup: {_lineup.Count()}  Scene: {_scene.Count()}");
         float spacer = .05f; // at room scale
         Vector3 lineupOriginPos = _dollhouseOrigin.transform.position;
-        float rotationAngle = 0f; //-90f;
+        float rotationAngle = -90f;
 
         if (!isLineupRotVectorDefined)
         {
             lineupRotVector = Quaternion.AngleAxis(rotationAngle, Vector3.up)
                               * Camera.main.transform.forward;
-            lineupRotVector = new Vector3(lineupRotVector.x, 0, lineupRotVector.z);
             isLineupRotVectorDefined = true;
         }
         lineupOriginPos = new Vector3(lineupOriginPos.x, 
@@ -143,15 +206,16 @@ public class Dollhouse : MonoBehaviour
         myCursor = lineupOriginPos;
         foreach (GameObject x in _lineup)
         {
-            Debug.Log($"ArrangeLineup: {x.name}");
             var newPos = myCursor;
-            var newRot = _initialRotationsForMiniObj[x];
             x.transform.position = newPos;
-            x.transform.rotation = newRot;
             var renderer = x.GetComponentInChildren<MeshRenderer>();
             var objWidth = renderer.bounds.size.x;
             myCursor -= lineupRotVector * (objWidth + spacer);
         }
+
+        //adjust the lineup holder
+        var temp = _lineupHolder.transform.localScale;
+        _lineupHolder.transform.localScale = new Vector3(4f * lineupWidth / _dollhouseOrigin.transform.localScale.x, 0.1f, temp.z);
     }
 
     public bool IsInLineup(GameObject obj)
@@ -176,6 +240,7 @@ public class Dollhouse : MonoBehaviour
         var miniObjCtrl = miniObj.GetComponentInChildren<MiniatureObjectController>();
         var lifesizeObj = miniObjCtrl.lifeSizeObject.gameObject;
         lifesizeObj.SetActive(true);
+        _scene.Add(miniObj);
     }
 
     // do this to make sure coords are set correctly after BuildDollhouse() is called
@@ -183,7 +248,7 @@ public class Dollhouse : MonoBehaviour
     {
         yield return new WaitForSeconds(0.5f);
         SetMiniObjInitialTransforms(); 
-        ArrangeLineup(); 
+        ArrangeLineup();
     }
     
     IEnumerator BuildDollhouse()
