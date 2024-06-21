@@ -2,6 +2,7 @@
   "dependencies": {
     "com.meta.xr.mrutilitykit": "65.0.0",
     "com.meta.xr.sdk.all": "65.0.0",
+    "com.unity.render-pipelines.universal": "14.0.9",
     "com.unity.test-framework": "1.1.33",
     "com.unity.xr.management": "4.4.1",
     "com.unity.xr.oculus": "4.1.2",

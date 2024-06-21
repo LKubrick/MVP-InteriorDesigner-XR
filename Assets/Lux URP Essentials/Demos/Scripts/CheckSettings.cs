@@ -1,13 +1,11 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Rendering;
-using UnityEngine.Rendering.Universal;
 
 namespace LuxURPEssentials.Demo {
 	public class CheckSettings : MonoBehaviour
 	{
-	    // Start is called before the first frame update
+	    /*/ Start is called before the first frame update
 	    void Start()
 	    {
 	        UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset urp = GraphicsSettings.renderPipelineAsset as UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset;
@@ -26,6 +24,6 @@ namespace LuxURPEssentials.Demo {
 	        	Debug.Log("CameraOpaqueTexture not supported.");
 	        }
 
-	    }
+	    }*/
 	}
 }
