@@ -40,23 +40,38 @@ public class MiniatureObjectController : MonoBehaviour
 
         return bounds;
     }
-    
+
+    void MakeHorizontal()
+    {
+        float xRotation = -90f; // empirically, what seems to work in our scene
+        float yRotation = transform.localRotation.eulerAngles.y;
+        float zRotation = transform.localRotation.eulerAngles.z;
+        Quaternion rotationQtrn = Quaternion.Euler(xRotation, yRotation, zRotation);
+        transform.localRotation = rotationQtrn;
+    }
     private void FixedUpdate()
     {
         Vector3 delta = transform.localPosition - initialPosition;
         initialPosition = transform.localPosition;
 
         // trap the release of an object
-        if (isBeingGrabbed && !IsBeingGrabbed())
-        {
-            isBeingGrabbed = IsBeingGrabbed();
+        var wasBeingGrabbed = isBeingGrabbed; // was being grabbed in previous update call?
+        isBeingGrabbed = IsBeingGrabbed(); // update variable
 
+        if (!wasBeingGrabbed && IsBeingGrabbed())
+        {
+            // item was just pinched
             if (_dollhouse.IsInLineup(gameObject))
             {
+                MakeHorizontal();
                 _dollhouse.AddToScene(gameObject);
                 return;
             }
-            else
+        }
+        if (wasBeingGrabbed && !IsBeingGrabbed())
+        {
+            // item was just released
+            if (!_dollhouse.IsInLineup(gameObject))
             {
                 // check if outside dollhouse bounds - project onto 2d x-z plane of floor
                 bool isBelowFloor = transform.position.y < _dollhouse._floor.transform.position.y;
@@ -66,21 +81,20 @@ public class MiniatureObjectController : MonoBehaviour
                     return;
                 }
 
-                //snap to floor
+                //snap to floor to original / layout position
                 var initialPos = _dollhouse.GetInitialPosition(gameObject);
                 var newPos = new Vector3(transform.localPosition.x, initialPos.y, transform.localPosition.z);
-                float xRotation = -90f; // empirically, what seems to work in our scene
-                float yRotation = transform.localRotation.eulerAngles.y;
-                float zRotation = transform.localRotation.eulerAngles.z;
-                Quaternion rotationQtrn = Quaternion.Euler(xRotation, yRotation, zRotation);
-                transform.localRotation = rotationQtrn;
                 transform.localPosition = newPos;
             }
         }
         else
         {
-            isBeingGrabbed = IsBeingGrabbed();
+            if (isBeingGrabbed)
+            {
+                MakeHorizontal();
+            }
         }
+
         // Apply the delta to the corresponding life-size object
         if (lifeSizeObject)
         {

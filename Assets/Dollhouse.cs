@@ -263,6 +263,7 @@ public class Dollhouse : MonoBehaviour
                               * Camera.main.transform.forward;
             isLineupRotVectorDefined = true;
         }
+
         lineupOriginPos = new Vector3(lineupOriginPos.x, 
             lineupOriginPos.y, lineupOriginPos.z);
         lineupOriginPos += lineupRotVector * 0.5f;
@@ -294,6 +295,7 @@ public class Dollhouse : MonoBehaviour
             x.transform.position = newPos;
             var renderer = x.GetComponentInChildren<MeshRenderer>();
             var objWidth = renderer.bounds.size.x;
+            MakeHorizontal(x.transform);
             myCursor -= lineupRotVector * (objWidth + spacer);
         }
 
@@ -301,7 +303,14 @@ public class Dollhouse : MonoBehaviour
         var temp = _lineupHolder.transform.localScale;
         _lineupHolder.transform.localScale = new Vector3(4f * lineupWidth / _dollhouseOrigin.transform.localScale.x, 0.1f, temp.z);
     }
-
+    void MakeHorizontal(Transform _transform)
+    {
+        float xRotation = -90f; // empirically, what seems to work in our scene
+        float yRotation = _transform.localRotation.eulerAngles.y;
+        float zRotation = _transform.localRotation.eulerAngles.z;
+        Quaternion rotationQtrn = Quaternion.Euler(xRotation, yRotation, zRotation);
+        _transform.localRotation = rotationQtrn;
+    }
     public bool IsInLineup(GameObject obj)
     {
         return _lineup.Contains(obj);
