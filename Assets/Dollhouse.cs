@@ -17,6 +17,11 @@ public class Dollhouse : MonoBehaviour
     [SerializeField] private List<String> _namesToBuildDollhouseOnly;
     [SerializeField] private OVRPassthroughLayer _passthrough;
     [SerializeField] private GameObject _lineupHolder;
+    [SerializeField] private GameObject _buttonA;
+    [SerializeField] private GameObject _buttonB;
+    [SerializeField] private GameObject _buttonC;
+    [SerializeField] private GameObject _buttonXR;
+    [SerializeField] private TMP_Text _debugText;
     
     private List<GameObject> dollhouseOnlyLargeItems = new List<GameObject>();
     private Vector3 lineupRotVector;
@@ -30,6 +35,7 @@ public class Dollhouse : MonoBehaviour
     
     private bool isFirstTime = true;
     public GameObject _floor;
+    float _buttonPressStartTime;
 
     // Start is called before the first frame update
     void Start()
@@ -43,6 +49,54 @@ public class Dollhouse : MonoBehaviour
         return _lineup.Concat(_scene); // clones the list
     }
 
+    public void OnButtonSelect(GameObject button)
+    {
+        _debugText.text = $"Select {button} Xr: {_buttonXR} a: {_buttonA}";
+        if (button == _buttonXR)
+        {
+            _debugText.text += "toggle vr";
+            ToggleVRMode();
+        }
+        _buttonPressStartTime = Time.time;
+    }
+
+    public void OnButtonRelease(GameObject button)
+    {
+        _debugText.text = $"Release {button} Xr: {_buttonXR} a: {_buttonA}";
+        int layoutIdx = -1;
+        if (button == _buttonXR)
+        {
+            return;
+        } 
+        else if (button == _buttonA)
+        {
+            layoutIdx = 0;
+        }
+        else if (button == _buttonB)
+        {
+            layoutIdx = 1;
+        } 
+        else if (button == _buttonC)
+        {
+            layoutIdx = 2;
+        }
+
+        if (layoutIdx > -1)
+        {
+            var timeElapsed = Time.time - _buttonPressStartTime;
+            _debugText.text += $"idx: {layoutIdx} elapsed: {timeElapsed}";
+            if (timeElapsed > 1f)
+            {
+                SaveLayout(layoutIdx);
+            }
+            else
+            {
+                LoadLayout(layoutIdx);
+            }
+        }
+    }
+
+    
     // layout state
     struct LayoutData
     {
@@ -50,14 +104,54 @@ public class Dollhouse : MonoBehaviour
         public Quaternion rot { get; set; }
     }
     Dictionary<GameObject, LayoutData>[] savedLayouts = new Dictionary<GameObject, LayoutData>[3];
+
+    void SaveLayout(int layoutIdx)
+    {
+        savedLayouts[layoutIdx] = new Dictionary<GameObject, LayoutData>();
+        foreach (var obj in _scene)
+        {
+            LayoutData layoutData = new LayoutData
+            {
+                pos = obj.transform.localPosition, rot = obj.transform.localRotation
+            };
+            savedLayouts[layoutIdx][obj] = layoutData;
+        }
+
+        var cnt = savedLayouts[layoutIdx].Count();
+        Debug.Log($"savedLayouts: {cnt}");
+    }
     
+    void LoadLayout(int layoutIdx)
+    {
+        // clone the list bc we will clear lineup and scene immediately
+        var allObj = new List<GameObject>(GetAllMiniObjects());
+        _lineup.Clear();
+        _scene.Clear();
+        foreach (var x in allObj)
+        {
+            AddToLineup(x);
+
+            if (savedLayouts[layoutIdx].ContainsKey(x))
+            {
+                Debug.Log($"saved layout found for {x} adding to scene");
+                var data = savedLayouts[layoutIdx][x];
+                _initialPositionsForMiniObj[x] = data.pos;
+                _initialRotationsForMiniObj[x] = data.rot;
+                AddToScene(x);
+            }
+        }
+        ArrangeLineup();
+    }
     // trigger events from unity editor
     void DebugHotKeys()
     {
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            AddToScene(_lineup.First());
-            ArrangeLineup();
+            if (_lineup.Count() > 0)
+            {
+                AddToScene(_lineup.First());
+                ArrangeLineup();
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.W))
@@ -65,43 +159,33 @@ public class Dollhouse : MonoBehaviour
             AddToLineup(_scene.First(), true);
         }
         
-        int layoutIdx = 0;
         if (Input.GetKeyDown(KeyCode.A)) // replay layout
         {
-            // clone the list bc we will clear lineup and scene immediately
-            var allObj = new List<GameObject>(GetAllMiniObjects());
-            _lineup.Clear();
-            _scene.Clear();
-            foreach (var x in allObj)
-            {
-                AddToLineup(x);
-
-                if (savedLayouts[layoutIdx].ContainsKey(x))
-                {
-                    Debug.Log($"saved layout found for {x} adding to scene");
-                    var data = savedLayouts[layoutIdx][x];
-                    _initialPositionsForMiniObj[x] = data.pos;
-                    _initialRotationsForMiniObj[x] = data.rot;
-                    AddToScene(x);
-                }
-            }
-            ArrangeLineup();
+            LoadLayout(0);
         }
         
         if (Input.GetKeyDown(KeyCode.Z)) // save layout
         {
-            savedLayouts[layoutIdx] = new Dictionary<GameObject, LayoutData>();
-            foreach (var obj in _scene)
-            {
-                LayoutData layoutData = new LayoutData
-                {
-                    pos = obj.transform.localPosition, rot = obj.transform.localRotation
-                };
-                savedLayouts[layoutIdx][obj] = layoutData;
-            }
-
-            var cnt = savedLayouts[layoutIdx].Count();
-            Debug.Log($"savedLayouts: {cnt}");
+            SaveLayout(0);
+        }
+        
+        if (Input.GetKeyDown(KeyCode.S)) // replay layout
+        {
+            LoadLayout(1);
+        }
+        
+        if (Input.GetKeyDown(KeyCode.X)) // save layout
+        {
+            SaveLayout(1);
+        }
+        if (Input.GetKeyDown(KeyCode.D)) // replay layout
+        {
+            LoadLayout(2);
+        }
+        
+        if (Input.GetKeyDown(KeyCode.C)) // save layout
+        {
+            SaveLayout(2);
         }
     }
     
