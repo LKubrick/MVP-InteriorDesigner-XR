@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="6ae48d36-8921-440a-a3e3-978ec2c054e1" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/.idea.MVP-InteriorDesigner-XR/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.MVP-InteriorDesigner-XR/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Oculus/OculusProjectConfig.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Oculus/OculusProjectConfig.asset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Assets/Scenes/IsaacHo_VirtualHome.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Scenes/IsaacHo_VirtualHome.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Samples/Meta MR Utility Kit/65.0.0/Virtual Home/Furniture/VH_BED.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Samples/Meta MR Utility Kit/65.0.0/Virtual Home/Furniture/VH_BED.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/Samples/Meta MR Utility Kit/65.0.0/Virtual Home/Furniture/VH_WINDOWLIGHTBEAM.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/Samples/Meta MR Utility Kit/65.0.0/Virtual Home/Furniture/VH_WINDOWLIGHTBEAM.prefab" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

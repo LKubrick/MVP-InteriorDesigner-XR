@@ -3,6 +3,7 @@
     "com.meta.xr.mrutilitykit": "65.0.0",
     "com.meta.xr.sdk.all": "65.0.0",
     "com.meta.xr.sdk.interaction.ovr.samples": "65.0.0",
+    "com.unity.recorder": "4.0.3",
     "com.unity.test-framework": "1.1.33",
     "com.unity.xr.management": "4.4.1",
     "com.unity.xr.oculus": "4.1.2",
