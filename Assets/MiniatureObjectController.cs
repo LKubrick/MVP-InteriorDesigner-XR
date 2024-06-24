@@ -9,7 +9,7 @@ public class MiniatureObjectController : MonoBehaviour
     public Dollhouse _dollhouse;
     public Transform lifeSizeObject; // Assign this in the Inspector
     public float multiplyFactor = 8f;
-    public float initialYLocalPosLifesizeObject; // this is a hack -- was getting placed too high upon user release
+    public double initialYLocalPosLifesizeObject; // this is a hack -- was getting placed too high upon user release
     private bool isBeingGrabbed = false;
     
     private void Start()
@@ -101,7 +101,7 @@ public class MiniatureObjectController : MonoBehaviour
             lifeSizeObject.localPosition += delta * multiplyFactor;
             lifeSizeObject.localRotation = transform.localRotation;
             var p = lifeSizeObject.localPosition;
-            lifeSizeObject.localPosition = new Vector3(p.x, initialYLocalPosLifesizeObject, p.z);
+            lifeSizeObject.localPosition = new Vector3(p.x, (float)initialYLocalPosLifesizeObject, p.z);
         }
     }
 }

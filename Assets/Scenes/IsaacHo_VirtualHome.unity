@@ -3643,7 +3643,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3613868102660323786, guid: c2e00db6d2dfa42ac8d821db8d493a44, type: 3}
       propertyPath: SceneSettings.RoomIndex
-      value: 0
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3613868102660323786, guid: c2e00db6d2dfa42ac8d821db8d493a44, type: 3}
       propertyPath: SceneSettings.DataSource
@@ -3688,7 +3688,7 @@ PrefabInstance:
     - target: {fileID: 3613868102660323786, guid: c2e00db6d2dfa42ac8d821db8d493a44, type: 3}
       propertyPath: SceneSettings.RoomPrefabs.Array.data[8]
       value: 
-      objectReference: {fileID: 5618556046422172173, guid: 31818101cde292945ab80af5d14bec54, type: 3}
+      objectReference: {fileID: 383126261976665222, guid: 3e3757f7165078547b6173e9e861e1c8, type: 3}
     - target: {fileID: 3613868102660323786, guid: c2e00db6d2dfa42ac8d821db8d493a44, type: 3}
       propertyPath: SceneSettings.RoomPrefabs.Array.data[9]
       value: 
@@ -27588,7 +27588,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _dollhouseOrigin: {fileID: 2102158737}
-  _scalingFactor: 0.3
+  _scalingFactor: 0.2
   _namesToBuildFully:
   - PLANT
   - SCREEN
@@ -27597,6 +27597,7 @@ MonoBehaviour:
   - TABLE
   - COUCH
   - BED
+  - STORAGE
   _namesToBuildDollhouseOnly:
   - WALL
   - FLOOR
