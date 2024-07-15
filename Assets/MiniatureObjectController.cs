@@ -81,7 +81,7 @@ public class MiniatureObjectController : MonoBehaviour
                     return;
                 }
 
-                //snap to floor to original / layout position
+                // snap to floor
                 var initialPos = _dollhouse.GetInitialPosition(gameObject);
                 var newPos = new Vector3(transform.localPosition.x, initialPos.y, transform.localPosition.z);
                 transform.localPosition = newPos;

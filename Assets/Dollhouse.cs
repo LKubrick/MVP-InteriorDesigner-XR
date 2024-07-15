@@ -17,11 +17,14 @@ public class Dollhouse : MonoBehaviour
     [SerializeField] private List<String> _namesToBuildDollhouseOnly;
     [SerializeField] private OVRPassthroughLayer _passthrough;
     [SerializeField] private GameObject _lineupHolder;
+    [SerializeField] private GameObject _menuParent;
     [SerializeField] private GameObject _buttonA;
     [SerializeField] private GameObject _buttonB;
     [SerializeField] private GameObject _buttonC;
     [SerializeField] private GameObject _buttonXR;
     [SerializeField] private TMP_Text _debugText;
+    [SerializeField] private AudioSource _layoutOnSaveAudioSource;
+    [SerializeField] private GameObject _pokeInteractablePrefab;
     
     private List<GameObject> dollhouseOnlyLargeItems = new List<GameObject>();
     private Vector3 lineupRotVector;
@@ -36,12 +39,18 @@ public class Dollhouse : MonoBehaviour
     private bool isFirstTime = true;
     public GameObject _floor;
     float _buttonPressStartTime;
-
+    private int _buttonPressedLayoutIdx = -1;
+    
     // Start is called before the first frame update
     void Start()
     {
         _initialPositionsForMiniObj = new Dictionary<GameObject,Vector3>();
         _initialRotationsForMiniObj = new Dictionary<GameObject,Quaternion>();
+        for (int i = 0; i < 3; i++)
+        {
+            savedLayouts[i] = new Dictionary<GameObject, LayoutData>();
+        }
+
     }
 
     IEnumerable<GameObject> GetAllMiniObjects()
@@ -52,12 +61,27 @@ public class Dollhouse : MonoBehaviour
     public void OnButtonSelect(GameObject button)
     {
         _debugText.text = $"Select {button} Xr: {_buttonXR} a: {_buttonA}";
+        int layoutIdx = -1;
         if (button == _buttonXR)
         {
             _debugText.text += "toggle vr";
             ToggleVRMode();
+            return;
+        } 
+        else if (button == _buttonA)
+        {
+            layoutIdx = 0;
+        }
+        else if (button == _buttonB)
+        {
+            layoutIdx = 1;
+        } 
+        else if (button == _buttonC)
+        {
+            layoutIdx = 2;
         }
         _buttonPressStartTime = Time.time;
+        _buttonPressedLayoutIdx = layoutIdx;
     }
 
     public void OnButtonRelease(GameObject button)
@@ -80,20 +104,14 @@ public class Dollhouse : MonoBehaviour
         {
             layoutIdx = 2;
         }
-
-        if (layoutIdx > -1)
+        if (layoutIdx > -1 && _buttonPressedLayoutIdx > -1)
         {
-            var timeElapsed = Time.time - _buttonPressStartTime;
-            _debugText.text += $"idx: {layoutIdx} elapsed: {timeElapsed}";
-            if (timeElapsed > 1f)
-            {
-                SaveLayout(layoutIdx);
-            }
-            else
-            {
-                LoadLayout(layoutIdx);
-            }
+            // _buttonPressed would be null if SaveLayout was performed this cycle
+            //  so we know that we should load instead
+           LoadLayout(layoutIdx);
         }
+        _buttonPressStartTime = 0;
+        _buttonPressedLayoutIdx = -1;
     }
 
     
@@ -107,7 +125,6 @@ public class Dollhouse : MonoBehaviour
 
     void SaveLayout(int layoutIdx)
     {
-        savedLayouts[layoutIdx] = new Dictionary<GameObject, LayoutData>();
         foreach (var obj in _scene)
         {
             LayoutData layoutData = new LayoutData
@@ -145,6 +162,10 @@ public class Dollhouse : MonoBehaviour
     // trigger events from unity editor
     void DebugHotKeys()
     {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            ResetDollhousePlacement();
+        }
         if (Input.GetKeyDown(KeyCode.Q))
         {
             if (_lineup.Count() > 0)
@@ -193,6 +214,16 @@ public class Dollhouse : MonoBehaviour
     void Update()
     {
         DebugHotKeys();
+        if (_buttonPressedLayoutIdx > -1)
+        {
+            if (Time.time - _buttonPressStartTime > 0.6f)
+            {
+                _layoutOnSaveAudioSource.Play();
+                SaveLayout(_buttonPressedLayoutIdx);
+                _buttonPressStartTime = 0;
+                _buttonPressedLayoutIdx = -1;
+            }
+        }
         if (isFirstTime)
         {
             StartCoroutine(BuildDollhouse());
@@ -250,20 +281,23 @@ public class Dollhouse : MonoBehaviour
             _initialRotationsForMiniObj[x] = trans.localRotation;
         }
     }
+
+    private void ResetDollhousePlacement()
+    {
+        Debug.Log("Resseting Dollhouse Placement");
+        _dollhouseOrigin.transform.position = Camera.main.transform.position + Camera.main.transform.forward * 0.5f;
+        ArrangeLineup();
+    }
     private void ArrangeLineup()
     {
         Debug.Log($"Lineup: {_lineup.Count()}  Scene: {_scene.Count()}");
         float spacer = .05f; // at room scale
         Vector3 lineupOriginPos = _dollhouseOrigin.transform.position;
         float rotationAngle = -90f;
-
-        if (!isLineupRotVectorDefined)
-        {
-            lineupRotVector = Quaternion.AngleAxis(rotationAngle, Vector3.up)
-                              * Camera.main.transform.forward;
-            isLineupRotVectorDefined = true;
-        }
-
+        lineupRotVector = Quaternion.AngleAxis(rotationAngle, Vector3.up)
+                              * -Camera.main.transform.forward;
+        _menuParent.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
+        
         lineupOriginPos = new Vector3(lineupOriginPos.x, 
             lineupOriginPos.y, lineupOriginPos.z);
         lineupOriginPos += lineupRotVector * 0.5f;
@@ -279,6 +313,13 @@ public class Dollhouse : MonoBehaviour
             var renderer = x.GetComponentInChildren<MeshRenderer>();
             var objWidth = renderer.bounds.size.x;
             myCursor -= lineupRotVector * (objWidth + spacer);
+            
+            //XXX add Poke functionality:
+            //    add to prefab PokeInteractable under Visuals object (following documentation)
+            //var pokeWrapper = Instantiate(_pokeInteractablePrefab);
+            //var visualsParent = pokeWrapper.transform.Find("Visuals");
+            //pokeWrapper.transform.SetParent(_dollhouseOrigin.transform);
+            //x.transform.SetParent(visualsParent);
         }
         var lineupWidthVector = myCursor - lineupOriginPos;
         var lineupWidth = lineupWidthVector.magnitude;
@@ -389,7 +430,6 @@ public class Dollhouse : MonoBehaviour
                 }
 
                 Debug.Log($"trying to clone {obj.name}");
-                GameObject prefab = null;
                 GameObject newMiniObj = null;
                 newMiniObj = Instantiate(obj);
                 
@@ -462,6 +502,7 @@ public class Dollhouse : MonoBehaviour
                     AddToLineup(newMiniObj, false);
                 }
                 
+
                 // treat FLOOR specially
                 if (nameToSearch.Contains("FLOOR"))
                 {
