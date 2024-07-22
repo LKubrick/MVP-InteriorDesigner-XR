@@ -1,32 +1,40 @@
 using System;
 using Oculus.Interaction;
 using Oculus.Interaction.HandGrab;
+using TMPro;
 using UnityEngine;
 
 public class MiniatureObjectController : MonoBehaviour
 {
-    private Vector3 initialPosition;
-    public Dollhouse _dollhouse;
+    private Vector3 _initialPosition;
+    public Dollhouse dollhouse;
     public Transform lifeSizeObject; // Assign this in the Inspector
     public float multiplyFactor = 8f;
     public double initialYLocalPosLifesizeObject; // this is a hack -- was getting placed too high upon user release
-    private bool isBeingGrabbed = false;
+    private bool _isBeingGrabbed = false;
+    private HandGrabInteractable _grabInteractable;
+    private Vector3 _pinchStartPosition;
     
     private void Start()
     {
         // Store the initial position of this object
-        initialPosition = transform.localPosition;
+        _initialPosition = transform.localPosition;
+        _grabInteractable = gameObject.GetComponentInChildren<HandGrabInteractable>();
     }
 
     // checks if I (mini object) am being grabbed right now
     private bool IsBeingGrabbed()
     {
-        var grabInteractable = gameObject.GetComponentInChildren<HandGrabInteractable>();
-        if (grabInteractable != null)
+        if (_grabInteractable != null)
         {
-            return grabInteractable.State == InteractableState.Select;
+            return _grabInteractable.State == InteractableState.Select;
         }
         return false;
+    }
+
+    InteractableState GetGrabState()
+    {
+        return _grabInteractable.State;
     }
 
     Bounds CalculateBoundingBox(GameObject obj)
@@ -49,47 +57,102 @@ public class MiniatureObjectController : MonoBehaviour
         Quaternion rotationQtrn = Quaternion.Euler(xRotation, yRotation, zRotation);
         transform.localRotation = rotationQtrn;
     }
+
+    public void OnDrawGizmosOff()
+    {
+        Vector3 down = -dollhouse.transform.up;
+        Ray ray = new Ray(gameObject.transform.position, down);
+        RaycastHit[] hits = Physics.RaycastAll(ray, 100, ~0);
+        Gizmos.color = Color.green;
+        Gizmos.DrawRay(ray.origin, ray.direction);
+    }
+
     private void FixedUpdate()
     {
-        Vector3 delta = transform.localPosition - initialPosition;
-        initialPosition = transform.localPosition;
+        Vector3 delta = transform.localPosition - _initialPosition;
+        _initialPosition = transform.localPosition;
 
         // trap the release of an object
-        var wasBeingGrabbed = isBeingGrabbed; // was being grabbed in previous update call?
-        isBeingGrabbed = IsBeingGrabbed(); // update variable
+        var wasBeingGrabbed = _isBeingGrabbed; // was being grabbed in previous update call?
+        _isBeingGrabbed = IsBeingGrabbed(); // update variable
 
+        var grabState = GetGrabState();
+        if (grabState != InteractableState.Normal)
+        {
+            Debug.Log($"{grabState} {wasBeingGrabbed}");
+        }
+        
         if (!wasBeingGrabbed && IsBeingGrabbed())
         {
-            // item was just pinched
-            if (_dollhouse.IsInLineup(gameObject))
+            // accurately detects pinch on, but i don't know how to cancel the grab
+            //    programmatically, so any changes we make to transform are ignored
+            Debug.Log("PINCHING ON");
+            _pinchStartPosition = transform.localPosition;
+        }
+
+        if (wasBeingGrabbed && IsBeingGrabbed())
+        {
+            if (dollhouse.IsInLineup(gameObject))
             {
-                MakeHorizontal();
-                _dollhouse.AddToScene(gameObject);
-                return;
+                var pinchDisplacement = (transform.localPosition - _pinchStartPosition);
+                if (pinchDisplacement.magnitude >= 0.1f)
+                {
+                    dollhouse.AddToScene(gameObject, false);
+                    return;
+                }                
             }
         }
         if (wasBeingGrabbed && !IsBeingGrabbed())
         {
+            Debug.Log("PINCHING OFF");
             // item was just released
-            if (!_dollhouse.IsInLineup(gameObject))
+            if (dollhouse.IsInLineup(gameObject))
             {
-                // check if outside dollhouse bounds - project onto 2d x-z plane of floor
-                bool isBelowFloor = transform.position.y < _dollhouse._floor.transform.position.y;
-                if (isBelowFloor)
+                // quick pinch-release, add to scene in original position
+                MakeHorizontal();
+                dollhouse.AddToScene(gameObject);
+                return;
+            }
+            else 
+            {
+                // shoot a ray down from center position
+                Vector3 down = -dollhouse.transform.up;
+                Ray ray = new Ray(gameObject.transform.position, down);
+                RaycastHit[] hits = Physics.RaycastAll(ray, 100, ~0);
+                bool hitsDollhouseFloor = false;
+                float rayRange = 1.0f; // Adjust the length of the rays as needed
+                
+                // note: there are multiple gameobjects in the scene with name matching "FLOOR"
+                //   so we do check more precisely
+                foreach (RaycastHit hit in hits)
                 {
-                    _dollhouse.AddToLineup(gameObject);
-                    return;
+                    GameObject hitObject = hit.transform.gameObject;
+                    Debug.Log($"Raycast hit!: {hitObject}");
+                    if (hitObject.transform.parent.name.Contains("FLOOR(Clone)"))
+                    {
+                        Debug.Log("dollhouse.floor HIT");
+                        hitsDollhouseFloor = true;
+                        break;
+                    }
                 }
 
-                // snap to floor
-                var initialPos = _dollhouse.GetInitialPosition(gameObject);
-                var newPos = new Vector3(transform.localPosition.x, initialPos.y, transform.localPosition.z);
-                transform.localPosition = newPos;
+                if (hitsDollhouseFloor)
+                {
+                    // snap to floor
+                    var initialPos = dollhouse.GetInitialPosition(gameObject);
+                    var newPos = new Vector3(transform.localPosition.x, initialPos.y, transform.localPosition.z);
+                    transform.localPosition = newPos;
+                    transform.localRotation = lifeSizeObject.localRotation;
+                }
+                else
+                {
+                    dollhouse.AddToLineup(gameObject);
+                }
             }
         }
         else
         {
-            if (isBeingGrabbed)
+            if (_isBeingGrabbed)
             {
                 MakeHorizontal();
             }
@@ -114,7 +177,7 @@ using UnityEngine;
 public class MiniatureObjectController : MonoBehaviour
 {
     private Vector3 initialPosition;
-    public Dollhouse _dollhouse;
+    public Dollhouse dollhouse;
     public Transform lifeSizeObject; // Assign this in the Inspector
     public float multiplyFactor = 8f;
     public float initialYLocalPosLifesizeObject; // this is a hack -- was getting placed too high upon user release
@@ -162,12 +225,12 @@ public class MiniatureObjectController : MonoBehaviour
         Vector3 delta = transform.localPosition - initialPosition;
         initialPosition = transform.localPosition;
 
-        if (!isBeingGrabbed && IsBeingGrabbed() && _dollhouse.IsInLineup(gameObject))
+        if (!isBeingGrabbed && IsBeingGrabbed() && dollhouse.IsInLineup(gameObject))
         {
             // object starts to be grabbed
             isBeingGrabbed = IsBeingGrabbed();
 
-            _dollhouse.AddToScene(gameObject);
+            dollhouse.AddToScene(gameObject);
             return;
         } 
         else if (isBeingGrabbed && !IsBeingGrabbed())
@@ -175,22 +238,22 @@ public class MiniatureObjectController : MonoBehaviour
             // trap release of object
             isBeingGrabbed = IsBeingGrabbed();
 
-            if (_dollhouse.IsInLineup(gameObject))
+            if (dollhouse.IsInLineup(gameObject))
             {
             }
             else
             {
                 // check if outside dollhouse bounds - project onto 2d x-z plane of floor
-                bool isBelowFloor = transform.position.y < _dollhouse._floor.transform.position.y;
+                bool isBelowFloor = transform.position.y < dollhouse._floor.transform.position.y;
                 if (isBelowFloor)
                 {
-                    _dollhouse.AddToLineup(gameObject);
+                    dollhouse.AddToLineup(gameObject);
                     return;
                 }
 
                 //snap to floor
                 EnforceHorizontalRotation();
-                var initialPos = _dollhouse.GetInitialPosition(gameObject);
+                var initialPos = dollhouse.GetInitialPosition(gameObject);
                 var newPos = new Vector3(transform.localPosition.x, initialPos.y, transform.localPosition.z);
                 transform.localPosition = newPos;
             }

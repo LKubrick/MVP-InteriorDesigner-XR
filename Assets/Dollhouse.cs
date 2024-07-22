@@ -233,17 +233,20 @@ public class Dollhouse : MonoBehaviour
 
     public void AddToLineup(GameObject x, bool callArrangeLineup = true)
     {
-        _lineup.Add(x);
-        _scene.Remove(x);
-        var rb = x.GetComponent<Rigidbody>();
-        rb.isKinematic = true;
-        var miniObjCtrl = x.GetComponentInChildren<MiniatureObjectController>();
-        var lifesizeObj = miniObjCtrl.lifeSizeObject.gameObject;
-        lifesizeObj.SetActive(false);
-
-        if (callArrangeLineup)
+        if (!_lineup.Contains(x))
         {
-            ArrangeLineup();
+            _lineup.Add(x);
+            _scene.Remove(x);
+            var rb = x.GetComponent<Rigidbody>();
+            rb.isKinematic = true;
+            var miniObjCtrl = x.GetComponentInChildren<MiniatureObjectController>();
+            var lifesizeObj = miniObjCtrl.lifeSizeObject.gameObject;
+            lifesizeObj.SetActive(false);
+
+            if (callArrangeLineup)
+            {
+                ArrangeLineup();
+            }
         }
     }
 
@@ -294,15 +297,13 @@ public class Dollhouse : MonoBehaviour
         float spacer = .05f; // at room scale
         Vector3 lineupOriginPos = _dollhouseOrigin.transform.position;
         float rotationAngle = -90f;
-        lineupRotVector = Quaternion.AngleAxis(rotationAngle, Vector3.up)
-                              * -Camera.main.transform.forward;
+        //lineupRotVector = Quaternion.AngleAxis(rotationAngle, Vector3.up)
+           //                   * -Camera.main.transform.forward;
         _menuParent.transform.rotation = Quaternion.LookRotation(Camera.main.transform.forward);
-        
+        lineupRotVector = _menuParent.transform.right;  // derived empircally from editor
         lineupOriginPos = new Vector3(lineupOriginPos.x, 
             lineupOriginPos.y, lineupOriginPos.z);
         lineupOriginPos += lineupRotVector * 0.5f;
-        
-        // XXX sort lineup by order in _namesToBuildFully
         
         // calculate the lineup width empirically
         var myCursor = lineupOriginPos;
@@ -313,14 +314,8 @@ public class Dollhouse : MonoBehaviour
             var renderer = x.GetComponentInChildren<MeshRenderer>();
             var objWidth = renderer.bounds.size.x;
             myCursor -= lineupRotVector * (objWidth + spacer);
-            
-            //XXX add Poke functionality:
-            //    add to prefab PokeInteractable under Visuals object (following documentation)
-            //var pokeWrapper = Instantiate(_pokeInteractablePrefab);
-            //var visualsParent = pokeWrapper.transform.Find("Visuals");
-            //pokeWrapper.transform.SetParent(_dollhouseOrigin.transform);
-            //x.transform.SetParent(visualsParent);
         }
+        
         var lineupWidthVector = myCursor - lineupOriginPos;
         var lineupWidth = lineupWidthVector.magnitude;
 
@@ -357,24 +352,28 @@ public class Dollhouse : MonoBehaviour
         return _lineup.Contains(obj);
     }
 
-    public void AddToScene(GameObject miniObj)
+    public void AddToScene(GameObject miniObj, bool ignoreOriginalPosition=false)
     {
         Debug.Log($"AddToScene: {miniObj.name}");
-        _lineup.Remove(miniObj);
-        var origPos = _initialPositionsForMiniObj[miniObj];
-        var origRot = _initialRotationsForMiniObj[miniObj];
-        Debug.Log($"AddToScene: setting initial transform for {miniObj.name} -> {origPos} {origRot}");
+        if (_lineup.Contains(miniObj))
+        {
+            _lineup.Remove(miniObj);
+            if (!ignoreOriginalPosition)
+            {
+                var origPos = _initialPositionsForMiniObj[miniObj];
+                var origRot = _initialRotationsForMiniObj[miniObj];
+                Debug.Log($"AddToScene: setting initial transform for {miniObj.name} -> {origPos} {origRot}");
 
-        miniObj.transform.localPosition = origPos;
-        miniObj.transform.localRotation = origRot;
-        
-        var rb = miniObj.GetComponent<Rigidbody>();
-        //rb.isKinematic = false; keep it kinematic the whole time
+                miniObj.transform.localPosition = origPos;
+                miniObj.transform.localRotation = origRot;
+            }
 
-        var miniObjCtrl = miniObj.GetComponentInChildren<MiniatureObjectController>();
-        var lifesizeObj = miniObjCtrl.lifeSizeObject.gameObject;
-        lifesizeObj.SetActive(true);
-        _scene.Add(miniObj);
+            var rb = miniObj.GetComponent<Rigidbody>();
+            var miniObjCtrl = miniObj.GetComponentInChildren<MiniatureObjectController>();
+            var lifesizeObj = miniObjCtrl.lifeSizeObject.gameObject;
+            lifesizeObj.SetActive(true);
+            _scene.Add(miniObj);
+        }
     }
 
     // do this to make sure coords are set correctly after BuildDollhouse() is called
@@ -384,7 +383,6 @@ public class Dollhouse : MonoBehaviour
         SetMiniObjInitialTransforms(); 
         ArrangeLineup();
     }
-    
     IEnumerator BuildDollhouse()
     {
         yield return new WaitForSeconds(2);
@@ -463,7 +461,7 @@ public class Dollhouse : MonoBehaviour
                     var ctrl = newMiniObj.AddComponent<MiniatureObjectController>();
                     ctrl.multiplyFactor = 1.0f / _scalingFactor;
                     ctrl.lifeSizeObject = obj.transform;
-                    ctrl._dollhouse = this;
+                    ctrl.dollhouse = this;
                     ctrl.initialYLocalPosLifesizeObject = obj.transform.localPosition.y;
                 }
 
@@ -502,7 +500,6 @@ public class Dollhouse : MonoBehaviour
                     AddToLineup(newMiniObj, false);
                 }
                 
-
                 // treat FLOOR specially
                 if (nameToSearch.Contains("FLOOR"))
                 {
