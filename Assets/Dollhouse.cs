@@ -22,7 +22,6 @@ public class Dollhouse : MonoBehaviour
     [SerializeField] private GameObject _buttonB;
     [SerializeField] private GameObject _buttonC;
     [SerializeField] private GameObject _buttonXR;
-    [SerializeField] private TMP_Text _debugText;
     [SerializeField] private AudioSource _layoutOnSaveAudioSource;
     [SerializeField] private GameObject _pokeInteractablePrefab;
     
@@ -60,11 +59,9 @@ public class Dollhouse : MonoBehaviour
 
     public void OnButtonSelect(GameObject button)
     {
-        _debugText.text = $"Select {button} Xr: {_buttonXR} a: {_buttonA}";
         int layoutIdx = -1;
         if (button == _buttonXR)
         {
-            _debugText.text += "toggle vr";
             ToggleVRMode();
             return;
         } 
@@ -86,7 +83,6 @@ public class Dollhouse : MonoBehaviour
 
     public void OnButtonRelease(GameObject button)
     {
-        _debugText.text = $"Release {button} Xr: {_buttonXR} a: {_buttonA}";
         int layoutIdx = -1;
         if (button == _buttonXR)
         {
@@ -216,7 +212,7 @@ public class Dollhouse : MonoBehaviour
         DebugHotKeys();
         if (_buttonPressedLayoutIdx > -1)
         {
-            if (Time.time - _buttonPressStartTime > 0.6f)
+            if (Time.time - _buttonPressStartTime > 0.7f)
             {
                 _layoutOnSaveAudioSource.Play();
                 SaveLayout(_buttonPressedLayoutIdx);
